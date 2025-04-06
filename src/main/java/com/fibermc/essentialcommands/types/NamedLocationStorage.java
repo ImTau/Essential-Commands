@@ -37,12 +37,13 @@ public class NamedLocationStorage extends HashMap<String, NamedMinecraftLocation
             NbtList homesNbtList = (NbtList) nbt;
             for (NbtElement t : homesNbtList) {
                 NbtCompound homeTag = (NbtCompound) t;
-                var homeName = homeTag.getString("homeName");
-                super.put(homeName, NamedMinecraftLocation.fromNbt(homeTag, homeName));
+                homeTag.getString("homeName").ifPresent((homeName) -> {
+                    super.put(homeName, NamedMinecraftLocation.fromNbt(homeTag, homeName));
+                });
             }
         } else {
             NbtCompound nbtCompound = (NbtCompound) nbt;
-            nbtCompound.getKeys().forEach((key) -> super.put(key, NamedMinecraftLocation.fromNbt(nbtCompound.getCompound(key), key)));
+            nbtCompound.getKeys().forEach((key) -> super.put(key, NamedMinecraftLocation.fromNbt(nbtCompound.getCompoundOrEmpty(key), key)));
         }
     }
 
