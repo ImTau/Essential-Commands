@@ -20,14 +20,8 @@ import com.fibermc.essentialcommands.types.MinecraftLocation;
 import com.fibermc.essentialcommands.types.NamedLocationStorage;
 import com.fibermc.essentialcommands.types.NamedMinecraftLocation;
 import com.fibermc.essentialcommands.util.NicknameTextUtil;
-
-import com.mojang.serialization.Codec;
-
 import io.github.ladysnake.pal.Pal;
 import io.github.ladysnake.pal.VanillaAbilities;
-
-import net.minecraft.nbt.NbtOps;
-
 import org.jetbrains.annotations.NotNull;
 
 import com.mojang.brigadier.context.CommandContext;
@@ -111,11 +105,9 @@ public class PlayerData extends PersistentState implements IServerPlayerEntityDa
      * and any operations that would require a ServerPlayerEntity will fail.
      * </p>
      *
-     * @param playerUuid UUID of the player whose data we want to grab or modify.
      * @param saveFile   The save file for this PlayerData instance.
      */
-    public PlayerData(UUID playerUuid, File saveFile) {
-        this.pUuid = playerUuid;
+    public PlayerData(File saveFile) {
         this.saveFile = saveFile;
         incomingTeleportRequests = new LinkedHashMap<>();
         homes = new NamedLocationStorage();
@@ -328,13 +320,11 @@ public class PlayerData extends PersistentState implements IServerPlayerEntityDa
     }
 
     public void fromNbt(NbtCompound tag, RegistryWrapper.WrapperLookup wrapperLookup) {
-        NbtCompound dataTag = tag.getCompoundOrEmpty("data");
-        Optional<String> uuidOptional = dataTag.get(StorageKey.PLAYER_UUID, Codec.STRING, NbtOps.INSTANCE);
-        if (uuidOptional.isPresent()) {
-            this.pUuid = UUID.fromString(uuidOptional.get());
-        } else {
-            EssentialCommands.LOGGER.warn("PlayerData NBT did not contain a UUID. This is likely a bug.");
+        Optional<NbtCompound> maybeDataTag = tag.getCompound("data");
+        if (maybeDataTag.isEmpty()) {
+            return;
         }
+        var dataTag = maybeDataTag.get();
 
         NamedLocationStorage homes = new NamedLocationStorage();
         NbtElement homesTag = dataTag.get(StorageKey.HOMES);
@@ -343,24 +333,20 @@ public class PlayerData extends PersistentState implements IServerPlayerEntityDa
         }
         this.homes = homes;
 
-        if (dataTag.contains(StorageKey.NICKNAME)) {
-            dataTag.getString(StorageKey.NICKNAME).ifPresent((nick) -> {
-                this.nickname = Text.Serialization.fromJson(nick, wrapperLookup);
-                try {
-                    reloadFullNickname();
-                } catch (NullPointerException ignore) {
-                    EssentialCommands.LOGGER.warn("Could not refresh player full nickanme, as ServerPlayerEntity was null in PlayerData.");
-                }
-            });
-        }
+        dataTag.getString(StorageKey.NICKNAME).ifPresent((nick) -> {
+            this.nickname = Text.Serialization.fromJson(nick, wrapperLookup);
+            try {
+                reloadFullNickname();
+            } catch (NullPointerException ignore) {
+                EssentialCommands.LOGGER.warn("Could not refresh player full nickanme, as ServerPlayerEntity was null in PlayerData.");
+            }
+        });
 
-        if (dataTag.contains(StorageKey.TIME_USED_RTP_EPOCH_MS)) {
-            dataTag.getLong(StorageKey.TIME_USED_RTP_EPOCH_MS).ifPresent((time) -> {
-                this.timeUsedRtp = TimeUtil.epochTimeMsToTicks(time);
-            });
-        }
+        dataTag.getLong(StorageKey.TIME_USED_RTP_EPOCH_MS).ifPresent((time) -> {
+            this.timeUsedRtp = TimeUtil.epochTimeMsToTicks(time);
+        });
 
-        if (CONFIG.PERSIST_BACK_LOCATION && dataTag.contains(StorageKey.PREVIOUS_LOCATION)) {
+        if (CONFIG.PERSIST_BACK_LOCATION) {
             dataTag.getCompound(StorageKey.PREVIOUS_LOCATION).ifPresent((nbt) -> {
                 this.previousLocation = MinecraftLocation.fromNbt(nbt);
             });
@@ -372,10 +358,7 @@ public class PlayerData extends PersistentState implements IServerPlayerEntityDa
 
     }
 
-    @Override
     public NbtCompound writeNbt(NbtCompound tag, RegistryWrapper.WrapperLookup wrapperLookup) {
-        tag.put(StorageKey.PLAYER_UUID, Codec.STRING, pUuid.toString());
-
         NbtCompound homesNbt = new NbtCompound();
         homes.writeNbt(homesNbt);
         tag.put(StorageKey.HOMES, homesNbt);
