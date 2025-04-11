@@ -67,7 +67,9 @@ public class WorldDataManager extends PersistentState {
             boolean fileExisted = !worldDataFile.createNewFile();
             if (fileExisted && worldDataFile.length() > 0) {
                 // if files was not JUST created, read data from it.
-                this.fromNbt(NbtIo.readCompressed(worldDataFile.toPath(), NbtSizeTracker.ofUnlimitedBytes()).getCompoundOrEmpty("data"));
+                NbtIo.readCompressed(worldDataFile.toPath(), NbtSizeTracker.ofUnlimitedBytes())
+                    .getCompound("data")
+                    .ifPresent(this::fromNbt);
             } else {
                 this.markDirty();
                 this.save(server.getRegistryManager());
@@ -83,14 +85,13 @@ public class WorldDataManager extends PersistentState {
     }
 
     public void fromNbt(NbtCompound tag) {
-        MinecraftLocation tempSpawnLocation = MinecraftLocation.fromNbt(tag.getCompoundOrEmpty(SPAWN_KEY));
-        if (tempSpawnLocation.dim().getValue().getPath().isEmpty()) {
-            this.spawnLocation = null;
-        } else {
-            this.spawnLocation = tempSpawnLocation;
-        }
-        NbtCompound warpsNbt = tag.getCompoundOrEmpty(WARPS_KEY);
-        warps.loadNbt(warpsNbt);
+        this.spawnLocation = tag.getCompound(SPAWN_KEY)
+            .map(MinecraftLocation::fromNbt)
+            .orElse(null);
+
+        tag.getCompound(WARPS_KEY)
+            .ifPresent(warps::loadNbt);
+
         warpsLoadEvent.invoker().accept(warps);
     }
 
