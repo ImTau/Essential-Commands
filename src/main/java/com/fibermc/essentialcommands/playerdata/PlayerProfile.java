@@ -103,7 +103,8 @@ public class PlayerProfile extends PersistentState implements IServerPlayerEntit
     }
 
     public void fromNbt(NbtCompound tag) {
-        NbtCompound dataTag = tag.getCompoundOrEmpty("data");
+        // `data` was the main obj key in old mc PersistentState schema
+        NbtCompound dataTag = tag.getCompound("data").orElse(tag);
         this.profileOptions = new ProfileOptions();
 
         this.profileOptions.formattingDefault = dataTag.getString(StorageKey.FORMATTING_DEAULT)

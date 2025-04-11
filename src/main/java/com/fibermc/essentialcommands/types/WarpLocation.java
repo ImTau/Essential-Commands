@@ -1,6 +1,6 @@
 package com.fibermc.essentialcommands.types;
 
-import java.util.Objects;
+import java.util.Optional;
 
 import com.fibermc.essentialcommands.ECPerms;
 
@@ -27,14 +27,14 @@ public class WarpLocation extends NamedMinecraftLocation {
     }
 
     public static WarpLocation fromNbt(NbtCompound tag, String name) {
-        String permissionString1 = tag.getString("permissionString").orElseThrow();
-        if (Objects.equals(permissionString1, "")) {
-            permissionString1 = null;
-        }
+        // `data` was the main obj key in old mc PersistentState schema
+        tag = tag.getCompound("data").orElse(tag);
 
         var loc = new WarpLocation();
         loc.loadNbt(tag, name);
-        loc.permissionString = permissionString1;
+        loc.permissionString = tag.getString("permissionString")
+            .flatMap(str -> str.isBlank() ? Optional.empty() : Optional.of(str))
+            .orElse(null);
         return loc;
     }
 

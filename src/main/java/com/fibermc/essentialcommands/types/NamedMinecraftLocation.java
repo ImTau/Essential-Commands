@@ -42,6 +42,8 @@ public class NamedMinecraftLocation extends MinecraftLocation {
 
     public static NamedMinecraftLocation fromNbt(NbtCompound tag, String name) {
         var loc = new NamedMinecraftLocation();
+        // `data` was the main obj key in old mc PersistentState schema
+        tag = tag.getCompound("data").orElse(tag);
         loc.loadNbt(tag, name);
         return loc;
     }

@@ -320,11 +320,8 @@ public class PlayerData extends PersistentState implements IServerPlayerEntityDa
     }
 
     public void fromNbt(NbtCompound tag, RegistryWrapper.WrapperLookup wrapperLookup) {
-        Optional<NbtCompound> maybeDataTag = tag.getCompound("data");
-        if (maybeDataTag.isEmpty()) {
-            return;
-        }
-        var dataTag = maybeDataTag.get();
+        // `data` was the main obj key in old mc PersistentState schema
+        NbtCompound dataTag = tag.getCompound("data").orElse(tag);
 
         NamedLocationStorage homes = new NamedLocationStorage();
         NbtElement homesTag = dataTag.get(StorageKey.HOMES);

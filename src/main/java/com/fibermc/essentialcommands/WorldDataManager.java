@@ -19,7 +19,6 @@ import org.apache.logging.log4j.Level;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 
 import net.minecraft.nbt.NbtCompound;
-import net.minecraft.nbt.NbtElement;
 import net.minecraft.nbt.NbtIo;
 import net.minecraft.nbt.NbtSizeTracker;
 import net.minecraft.registry.DynamicRegistryManager;
@@ -67,9 +66,9 @@ public class WorldDataManager extends PersistentState {
             boolean fileExisted = !worldDataFile.createNewFile();
             if (fileExisted && worldDataFile.length() > 0) {
                 // if files was not JUST created, read data from it.
-                NbtIo.readCompressed(worldDataFile.toPath(), NbtSizeTracker.ofUnlimitedBytes())
-                    .getCompound("data")
-                    .ifPresent(this::fromNbt);
+                var tag = NbtIo.readCompressed(worldDataFile.toPath(), NbtSizeTracker.ofUnlimitedBytes());
+                // `data` was the main obj key in old mc PersistentState schema
+                this.fromNbt(tag.getCompound("data").orElse(tag));
             } else {
                 this.markDirty();
                 this.save(server.getRegistryManager());
@@ -86,6 +85,7 @@ public class WorldDataManager extends PersistentState {
 
     public void fromNbt(NbtCompound tag) {
         this.spawnLocation = tag.getCompound(SPAWN_KEY)
+            .flatMap(spawnTag -> spawnTag.isEmpty() ? Optional.empty() : Optional.of(spawnTag))
             .map(MinecraftLocation::fromNbt)
             .orElse(null);
 
@@ -116,11 +116,9 @@ public class WorldDataManager extends PersistentState {
 
     public NbtCompound writeNbt(NbtCompound tag, RegistryWrapper.WrapperLookup wrapperLookup) {
         // Spawn to NBT
-        NbtElement spawnNbt = spawnLocation != null
-            ? spawnLocation.asNbt()
-            : new NbtCompound();
-
-        tag.put(SPAWN_KEY, spawnNbt);
+        if (spawnLocation != null) {
+            tag.put(SPAWN_KEY, spawnLocation.asNbt());
+        }
 
         // Warps to NBT
         NbtCompound warpsNbt = new NbtCompound();
