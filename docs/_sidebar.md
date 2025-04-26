@@ -1,0 +1,7 @@
+- [Welcome](Welcome)
+- [Config Documentation](Config-Documentation)
+- [List of Commands & Permissions](List-of-Commands-&-Permissions)
+- [Home Limits](Home-Limit)
+- [Player Profiles](Player-Profiles)
+- [Recommended Companion Mods](Recommended-Companion-Mods)
+- [File Locations](File-locations)
