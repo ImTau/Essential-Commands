@@ -80,7 +80,7 @@ N/A | `essentialcommands.nickname.style.click` | Allows setting nicknames that e
 
 ## Rules/Config Bypass Permissions
 
-These permissions allow players to bypass rules defined in the [Essential Commands config](https://github.com/John-Paul-R/Essential-Commands/wiki/Config-Documentation).
+These permissions allow players to bypass rules defined in the [Essential Commands config](Config-Documentation).
 
 Permission | Description
 -----------|------------

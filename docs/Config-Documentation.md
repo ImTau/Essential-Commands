@@ -141,4 +141,4 @@ List of supported language ids (use these in the "language" config option):
 - ru_ru (Courtesy of @oldBrowze)
 - zh_cn (Courtesy of @MikhailTapio, @deluxghost, @Leo204_LKY)
 
-[home-limit]: https://github.com/John-Paul-R/Essential-Commands/wiki/Home-Limit
+[home-limit]: Home-Limit
