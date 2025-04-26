@@ -13,12 +13,22 @@
       content="Documentation for the Essential Commands Fabric Mod."
     />
 
-    <!-- <link
-      rel="stylesheet"
-      href="//cdn.jsdelivr.net/npm/docsify@4/lib/themes/vue.css"
-    /> -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/sushantrahate/docsify-darkly-theme/css/darkly.min.css">
-
+<!--    <link-->
+<!--      rel="stylesheet"-->
+<!--      href="//cdn.jsdelivr.net/npm/docsify@4/lib/themes/vue.css"-->
+<!--    />-->
+      <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/docsify-darklight-theme@3/dist/docsify-themeable/style.min.css" type="text/css">
+      <link title="light" rel="stylesheet" href="https://cdn.jsdelivr.net/npm/docsify-themeable@0/dist/css/theme-simple.css">
+      <link title="dark" rel="stylesheet" alternative href="https://cdn.jsdelivr.net/npm/docsify-themeable@0/dist/css/theme-simple-dark.css">
+      <!--    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/sushantrahate/docsify-darkly-theme/css/darkly.min.css">-->
+      <style>
+          :root {
+              /* --theme-hue: 325; */
+              --theme-hue: 126;
+              --mono-hue: 200;
+              --theme-color: #35d0af;
+          }
+      </style>
   </head>
 
   <body>
@@ -48,9 +58,19 @@
 
     <!-- Required -->
     <script src="https://cdn.jsdelivr.net/npm/docsify@4/lib/docsify.min.js"></script>
-
+    <script src="https://cdn.jsdelivr.net/npm/docsify-themeable@0/dist/js/docsify-themeable.min.js"></script>
     <!-- Default Plugins -->
     <script src="https://cdn.jsdelivr.net/npm/docsify@4/lib/plugins/zoom-image.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/docsify@4/lib/plugins/search.js"></script>
+
+    <script
+        src="//cdn.jsdelivr.net/npm/docsify-darklight-theme@3/dist/docsify-themeable/main.min.js"
+        type="text/javascript">
+    </script>
+
+    <script
+        src="//cdn.jsdelivr.net/npm/docsify-darklight-theme@3/dist/docsify-themeable/index.min.js"
+        type="text/javascript">
+    </script>
   </body>
 </html>
