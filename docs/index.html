@@ -1,87 +1,100 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-  <head>
-    <meta charset="utf-8" />
-    <meta
-      name="viewport"
-      content="width=device-width, initial-scale=1, minimum-scale=1.0, shrink-to-fit=no, viewport-fit=cover"
-    />
+    <head>
+        <meta charset="utf-8" />
+        <meta
+            name="viewport"
+            content="width=device-width, initial-scale=1, minimum-scale=1.0, shrink-to-fit=no, viewport-fit=cover"
+        />
 
-    <title>Essential Commands Wiki</title>
-    <meta
-      name="description"
-      content="Documentation for the Essential Commands Fabric Mod."
-    />
+        <title>Essential Commands Wiki</title>
+        <meta
+            name="description"
+            content="Documentation for the Essential Commands Fabric Mod."
+        />
 
-<!--    <link-->
-<!--      rel="stylesheet"-->
-<!--      href="//cdn.jsdelivr.net/npm/docsify@4/lib/themes/vue.css"-->
-<!--    />-->
-      <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/docsify-darklight-theme@3/dist/docsify-themeable/style.min.css" type="text/css">
-      <link title="light" rel="stylesheet" href="https://cdn.jsdelivr.net/npm/docsify-themeable@0/dist/css/theme-simple.css">
-      <link title="dark" rel="stylesheet" alternative href="https://cdn.jsdelivr.net/npm/docsify-themeable@0/dist/css/theme-simple-dark.css">
-      <!--    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/sushantrahate/docsify-darkly-theme/css/darkly.min.css">-->
-      <style>
-          :root {
-              /* --theme-hue: 325; */
-              --theme-hue: 126;
-              --mono-hue: 200;
-              --theme-color: #35d0af;
-          }
-      </style>
-  </head>
+        <!--    <link-->
+        <!--      rel="stylesheet"-->
+        <!--      href="//cdn.jsdelivr.net/npm/docsify@4/lib/themes/vue.css"-->
+        <!--    />-->
+        <link
+            rel="stylesheet"
+            href="//cdn.jsdelivr.net/npm/docsify-darklight-theme@3/dist/docsify-themeable/style.min.css"
+            type="text/css"
+        />
+        <link
+            title="light"
+            rel="stylesheet"
+            href="https://cdn.jsdelivr.net/npm/docsify-themeable@0/dist/css/theme-simple.css"
+        />
+        <link
+            title="dark"
+            rel="stylesheet"
+            alternative
+            href="https://cdn.jsdelivr.net/npm/docsify-themeable@0/dist/css/theme-simple-dark.css"
+        />
+        <!--    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/sushantrahate/docsify-darkly-theme/css/darkly.min.css">-->
+        <style>
+            :root {
+                /* --theme-hue: 325; */
+                --theme-hue: 126;
+                --mono-hue: 200;
+                --theme-color: #35d0af;
+            }
+        </style>
+    </head>
 
-  <body>
-    <div id="app"></div>
+    <body>
+        <div id="app"></div>
 
-    <!-- must load before config-->
-    <script src="//cdn.jsdelivr.net/npm/docsify-edit-on-github"></script>
+        <!-- must load before config-->
+        <script src="//cdn.jsdelivr.net/npm/docsify-edit-on-github"></script>
 
-    <script>
-      // Docsify Configuration (see https://docsify.js.org/#/configuration)
-      window.$docsify = {
-        name: "Essential Commands Docs",
+        <script>
+            // Docsify Configuration (see https://docsify.js.org/#/configuration)
+            window.$docsify = {
+                name: "Essential Commands Docs",
 
-        // Sidebar Configuration
-        auto2top: true,
-        loadSidebar: true,
-        maxLevel: 0,
-        // Set subMaxLevel to 0 to remove automatic display of page table of contents (TOC) in Sidebar
-        subMaxLevel: 3,
+                // Sidebar Configuration
+                auto2top: true,
+                loadSidebar: true,
+                maxLevel: 0,
+                // Set subMaxLevel to 0 to remove automatic display of page table of contents (TOC) in Sidebar
+                subMaxLevel: 3,
 
-        // Search Plugin Configuration
-        search: {
-          placeholder: "Type to search",
-          noData: "No matches found.",
-          // Headline depth, 1 - 6
-          depth: 2,
-        },
-        plugins: [
-            EditOnGithubPlugin.create(
-                "https://github.com/John-Paul-R/Essential-Commands/tree/1.21.x/docs/",
-                null,
-                () => "📝 Edit on GitHub"
-            ),
-        ]
-      };
-    </script>
+                // Search Plugin Configuration
+                search: {
+                    placeholder: "Type to search",
+                    noData: "No matches found.",
+                    // Headline depth, 1 - 6
+                    depth: 2,
+                },
+                plugins: [
+                    EditOnGithubPlugin.create(
+                        "https://github.com/John-Paul-R/Essential-Commands/tree/1.21.x/docs/",
+                        null,
+                        () => "📝 Edit on GitHub",
+                    ),
+                ],
+            };
+        </script>
 
-    <!-- Required -->
-    <script src="https://cdn.jsdelivr.net/npm/docsify@4/lib/docsify.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/docsify-themeable@0/dist/js/docsify-themeable.min.js"></script>
-    <!-- Default Plugins -->
-    <script src="https://cdn.jsdelivr.net/npm/docsify@4/lib/plugins/zoom-image.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/docsify@4/lib/plugins/search.js"></script>
+        <!-- Required -->
+        <script src="https://cdn.jsdelivr.net/npm/docsify@4/lib/docsify.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/docsify-themeable@0/dist/js/docsify-themeable.min.js"></script>
+        <!-- Default Plugins -->
+        <script src="https://cdn.jsdelivr.net/npm/docsify@4/lib/plugins/zoom-image.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/docsify@4/lib/plugins/search.js"></script>
 
-    <script
-        src="//cdn.jsdelivr.net/npm/docsify-darklight-theme@3/dist/docsify-themeable/main.min.js"
-        type="text/javascript">
-    </script>
+        <script
+            src="//cdn.jsdelivr.net/npm/docsify-darklight-theme@3/dist/docsify-themeable/main.min.js"
+            type="text/javascript"
+        ></script>
 
-    <script
-        src="//cdn.jsdelivr.net/npm/docsify-darklight-theme@3/dist/docsify-themeable/index.min.js"
-        type="text/javascript">
-    </script>
-
-  </body>
+        <script
+            src="//cdn.jsdelivr.net/npm/docsify-darklight-theme@3/dist/docsify-themeable/index.min.js"
+            type="text/javascript"
+        ></script>
+        <script src="https://cdn.jsdelivr.net/npm/docsify-tabs@1/dist/docsify-tabs.min.js"></script>
+    </body>
 </html>

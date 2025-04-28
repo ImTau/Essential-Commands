@@ -29,13 +29,13 @@ All commands and sub-commands have their own permissions node in the form:
 
 `essentialcommands.<command>.<subcommand>`
 
-*Note: The config option `use_permissions_api` must be set to `true` for permissions to have an effect.* ([Config Docs](https://github.com/John-Paul-R/Essential-Commands/wiki/Config-Documentation)) ([Permissions Docs](https://github.com/John-Paul-R/Essential-Commands/wiki/List-of-Commands-&-Permissions))
+*Note: The config option `use_permissions_api` must be set to `true` for permissions to have an effect.* ([Permissions Quickstart][permissions-quickstart])
 
 ## Commands
 
 All of these commands support automatic tab completion using Minecraft's new commands system.
 
-See the [full List of Commands & Permissions](https://github.com/John-Paul-R/Essential-Commands/wiki/List-of-Commands-&-Permissions).
+See the [full List of Commands & Permissions][commands-permissions-list].
 
 ### Spawn
 
@@ -117,4 +117,6 @@ Questions? Contact me in [my Discord server][discord].
 [releases]: https://github.com/John-Paul-R/essential-commands/releases
 [license]: LICENSE
 [discord]: https://discord.jpcode.dev/
-[config-docs]: https://github.com/John-Paul-R/Essential-Commands/wiki/Config-Documentation
+[config-docs]: https://john-paul-r.github.io/Essential-Commands/#/Config-Documentation
+[commands-permissions-list]: https://john-paul-r.github.io/Essential-Commands/#/List-of-Commands-&-Permissions
+[permissions-quickstart]: https://john-paul-r.github.io/Essential-Commands/#/Permissions-Quickstart
