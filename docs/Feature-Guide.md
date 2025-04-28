@@ -13,6 +13,8 @@ Essential Commands offers a few different commands that perform teleports. The f
 - `allow_teleport_between_dimensions` - Allow teleporting across dimensions - Default: `true`
 - `teleport_with_followers` - Whether followers teleport with the player - Default: `false`
 - `teleport_with_followers_radius` - Maximum radius to look for followers - Default: `100.0`
+- `print_teleport_coordinates` - Whether to show teleport coordinates in command chat feedback - Default: `true`
+    - see also the related [player profile](#player-profiles) `printTeleportCoordinates`
 
 Some of the restrictions imposed by some of the above options can be bypassed by select players when using a permissions mod, with the following permissions:
 
@@ -89,29 +91,54 @@ Server-wide spawn point management.
   
   You can combine these using logical operators, for example: `NoBed OR SameWorld` will use the EC spawn if either condition is true.
 
-### Other Teleportation
-Additional teleportation options.
+### Other Teleportation Features
+
+#### Back Command
+Return to your previous location.
 
 | Feature | Commands | Permissions |
 |---------|----------|------------|
 | Return to previous location | `/back` | `essentialcommands.back` |
-| Teleport to random location | `/rtp` or `/randomteleport` | `essentialcommands.randomteleport` |
-| Teleport to your bed or spawnpoint | `/bed` | `essentialcommands.bed` |
-| Teleport to highest block | `/top` | `essentialcommands.top` |
 
 **Related Config Options:**
 - `enable_back` - Enables/disables back command - Default: `true`
 - `allow_back_on_death` - Whether `/back` allows players to jump back to their death location - Default: `false`
 - `persist_back_location` - Whether back location persists across server restarts - Default: `false`
+
+#### Random Teleport
+Teleport to a random location in the world.
+
+| Feature | Commands | Permissions |
+|---------|----------|------------|
+| Teleport to random location | `/rtp` or `/randomteleport` | `essentialcommands.randomteleport` |
+
+**Related Config Options:**
 - `enable_rtp` - Enables/disables random teleport - Default: `true`
 - `rtp_radius` - Maximum distance for random teleport - Default: `1000`
 - `rtp_min_radius` - Minimum distance for random teleport - Default: Same as `rtp_radius` (`1000`)
 - `rtp_cooldown` - Cooldown between random teleports (seconds) - Default: `30`
 - `rtp_max_attempts` - Maximum tries to find valid location - Default: `15`
 - `rtp_enabled_worlds` - Worlds where RTP is enabled - Default: `overworld`
-- `enable_top` - Enables/disables top command - Default: `true`
+
+#### Bed Command
+Teleport to your bed or spawnpoint.
+
+| Feature | Commands | Permissions |
+|---------|----------|------------|
+| Teleport to your bed or spawnpoint | `/bed` | `essentialcommands.bed` |
+
+**Related Config Options:**
 - `enable_bed` - Enables/disables bed command - Default: `false`
-- `print_teleport_coordinates` - Whether to show teleport coordinates - Default: `true`
+
+#### Top Command
+Teleport to the highest block at your current position.
+
+| Feature | Commands | Permissions |
+|---------|----------|------------|
+| Teleport to highest block | `/top` | `essentialcommands.top` |
+
+**Related Config Options:**
+- `enable_top` - Enables/disables top command - Default: `true`
 
 ## Player Abilities, Status, and Display
 
