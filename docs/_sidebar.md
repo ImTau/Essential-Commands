@@ -2,6 +2,7 @@
 - [Feature Guide](Feature-Guide)
 - [Config Documentation](Config-Documentation)
 - [List of Commands & Permissions](List-of-Commands-&-Permissions)
+- [Permissions Quickstart](Permissions-Quickstart)
 - [Home Limits](Home-Limit)
 - [Player Profiles](Player-Profiles)
 - [Recommended Companion Mods](Recommended-Companion-Mods)
