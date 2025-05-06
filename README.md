@@ -1,4 +1,3 @@
-
 <div align="center">
 
 <!-- <img alt="Example Icon" src="src/main/resources/assets/essential_commands/icon.jpg" width="128"> -->
@@ -12,111 +11,122 @@ Configurable, permissions-backed utility commands for Fabric servers.
 
 [![Modrinth Downloads](https://img.shields.io/modrinth/dt/essential-commands?color=00AF5C&label=modrinth&style=for-the-badge&logo=modrinth)][modrinth:files]
 [![Curseforge Downloads](https://img.shields.io/badge/dynamic/json?color=f16436&style=for-the-badge&label=CurseForge&query=downloadCount&url=https://www.fibermc.com/api/v1.0/ForeignMods/475964&logo=CurseForge)][curseforge:files]
-[![GitHub Downloads (all releases)](https://img.shields.io/github/downloads/John-Paul-R/Essential-Commands/total?style=for-the-badge&amp;label=GitHub&amp;prefix=downloads%20&amp;color=4078c0&amp;logo=github)][releases]
+[![GitHub Downloads (all releases)](https://img.shields.io/github/downloads/John-Paul-R/Essential-Commands/total?style=for-the-badge&label=GitHub&prefix=downloads%20&color=4078c0&logo=github)][releases]
 
 </div>
 
 ## Description
 
-Essential Commands is a Minecraft (Fabric) mod that adds several simple commands to the game. \
+Essential Commands is a Minecraft (Fabric) mod that adds several simple commands
+to the game. \
 All commands are [configurable][config-docs] and toggleable. \
-The mod is purely serverside, and is not required on the client. (but it does work on singleplayer worlds).
+The mod is purely serverside, and is not required on the client. (but it does
+work on singleplayer worlds).
 
 ## Permissions
 
-Essential Commands supports permissions mods like LuckPerms!
-All commands and sub-commands have their own permissions node in the form:
+Essential Commands supports permissions mods like LuckPerms! All commands and
+sub-commands have their own permissions node in the form:
 
 `essentialcommands.<command>.<subcommand>`
 
-*Note: The config option `use_permissions_api` must be set to `true` for permissions to have an effect.* ([Permissions Quickstart][permissions-quickstart])
+_Note: The config option `use_permissions_api` must be set to `true` for
+permissions to have an effect._ ([Permissions
+Quickstart][permissions-quickstart])
 
 ## Commands
 
-All of these commands support automatic tab completion using Minecraft's new commands system.
+All of these commands support automatic tab completion using Minecraft's new
+commands system.
 
 See the [full List of Commands & Permissions][commands-permissions-list].
 
 ### Spawn
 
-  - /spawn
-  - /spawn set
+- /spawn
+- /spawn set
 
 ### Teleport requests
 
-  - /tpa \<target-player>
-  - /tpahere \<target-player>
-  - /tpaccept \<target-player>
-  - /tpdeny \<target-player>
+- /tpa \<target-player>
+- /tpahere \<target-player>
+- /tpaccept \<target-player>
+- /tpdeny \<target-player>
 
 ### Player Homes
 
-  - /home set \<home-name>
-  - /home tp \<home-name>
-  - /home delete \<home-name>
-  - /home list
+- /home set \<home-name>
+- /home tp \<home-name>
+- /home delete \<home-name>
+- /home list
 
 ### Warps
 
-  - /warp set \<warp-name>
-  - /warp tp \<warp-name>
-  - /warp delete \<warp-name>
-  - /warp list
+- /warp set \<warp-name>
+- /warp tp \<warp-name>
+- /warp delete \<warp-name>
+- /warp list
 
 ### Back
 
-  - /back
+- /back
 
-Want to teleport to where you died? Enable `allow_back_on_death` in the [config][config-docs].
+Want to teleport to where you died? Enable `allow_back_on_death` in the
+[config][config-docs].
 
 ### Nickname
 
-  - /nickname set \<nickname>
-  - /nickname clear
-  - /nickname reveal \<nickname>
+- /nickname set \<nickname>
+- /nickname clear
+- /nickname reveal \<nickname>
 
 ### Random Teleport (/wild equivalent)
 
-  - /randomteleport
-  - /rtp
+- /randomteleport
+- /rtp
 
 ### Workbench
 
-  - /workbench
-  - /anvil
-  - /enderchest
-  - /stonecutter
-  - /grindstone
-  - /wastebin
+- /workbench
+- /anvil
+- /enderchest
+- /stonecutter
+- /grindstone
+- /wastebin
 
 ### Kitchen sink
 
-  - /afk
-  - /fly
-  - /fly \<target-player>
-  - /invuln
-  - /invuln \<target-player>
-  - /top
-  - /day
-  - /gametime
+- /afk
+- /fly
+- /fly \<target-player>
+- /invuln
+- /invuln \<target-player>
+- /top
+- /day
+- /gametime
 
 ### Config
 
-  - /essentialcommands config reload
+- /essentialcommands config reload
 
 ## License
 
-Essential Commands is open-sourced software licenced under the [MIT license][license].
+Essential Commands is open-sourced software licenced under the [MIT
+license][license].
 
 ## Discord
 
 Questions? Contact me in [my Discord server][discord].
 
-[curseforge:files]: https://www.curseforge.com/minecraft/mc-mods/essential-commands/files
+[curseforge:files]:
+    https://www.curseforge.com/minecraft/mc-mods/essential-commands/files
 [modrinth:files]: https://modrinth.com/mod/essential-commands/versions
 [releases]: https://github.com/John-Paul-R/essential-commands/releases
 [license]: LICENSE
 [discord]: https://discord.jpcode.dev/
-[config-docs]: https://john-paul-r.github.io/Essential-Commands/#/Config-Documentation
-[commands-permissions-list]: https://john-paul-r.github.io/Essential-Commands/#/List-of-Commands-&-Permissions
-[permissions-quickstart]: https://john-paul-r.github.io/Essential-Commands/#/Permissions-Quickstart
+[config-docs]:
+    https://john-paul-r.github.io/Essential-Commands/#/Config-Documentation
+[commands-permissions-list]:
+    https://john-paul-r.github.io/Essential-Commands/#/List-of-Commands-&-Permissions
+[permissions-quickstart]:
+    https://john-paul-r.github.io/Essential-Commands/#/Permissions-Quickstart
