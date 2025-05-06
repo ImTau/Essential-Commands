@@ -123,7 +123,7 @@ Questions? Contact me in [my Discord server][discord].
 [modrinth:files]: https://modrinth.com/mod/essential-commands/versions
 [releases]: https://github.com/John-Paul-R/essential-commands/releases
 [license]: LICENSE
-[discord]: https://discord.jpcode.dev/
+[discord]: https://discord.jpcode.dev/essential-commands
 [config-docs]:
     https://john-paul-r.github.io/Essential-Commands/#/Config-Documentation
 [commands-permissions-list]:
