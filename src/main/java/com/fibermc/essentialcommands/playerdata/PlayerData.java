@@ -345,6 +345,9 @@ public class PlayerData extends PersistentState implements IServerPlayerEntityDa
         this.homes = homes;
 
         dataTag.getString(StorageKey.NICKNAME).ifPresent((nick) -> {
+            if ("null".equals(nick)) {
+                return;
+            }
             this.nickname = Text.Serialization.fromJson(nick, wrapperLookup);
             try {
                 reloadFullNickname();
