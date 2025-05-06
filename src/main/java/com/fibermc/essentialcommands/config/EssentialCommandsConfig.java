@@ -130,7 +130,6 @@ public final class EssentialCommandsConfig extends Config<EssentialCommandsConfi
             PlayerDataManager.getInstance().queueNicknameUpdatesForAllPlayers();
         });
 
-
         RTP_ENABLED_WORLDS.changeEvent.register(configuredWorldIdStrings -> {
             ManagerLocator.getInstance().runAndQueue("RTP_ENABLED_WORLDS", server -> {
                 var worldIds = server.getWorldRegistryKeys().stream()
@@ -166,6 +165,15 @@ public final class EssentialCommandsConfig extends Config<EssentialCommandsConfi
                     .forEach(this.validRtpWorldIds::add);
                 EssentialCommands.refreshConfigSnapshot();
             });
+        });
+
+        this.registerLoadHandler(config -> {
+            var rtpRadius = config.RTP_RADIUS.getValue();
+            var rtpMinRadius = config.RTP_MIN_RADIUS.getValue();
+            if (rtpMinRadius > rtpRadius) {
+                throw new IllegalArgumentException(
+                    "rtp_min_radius must be less than or equal to rtp_radius (%s)".formatted(config.path().toString()));
+            }
         });
     }
 

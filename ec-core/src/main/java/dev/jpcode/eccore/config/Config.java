@@ -36,6 +36,10 @@ public abstract class Config<T extends Config<T>> {
             .collect(Collectors.joining("\n"));
     }
 
+    public Path path()  {
+        return this.configPath;
+    }
+
     public Config(Path savePath, String displayName, String documentationLink) {
         this.configPath = savePath;
         this.displayName = displayName;
