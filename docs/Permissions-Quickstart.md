@@ -28,8 +28,8 @@ lp user <your username> permission set luckperms.* true
 Now, all that is left to do is grant users or groups access to EC commands. Some
 examples:
 
-Grant all players full regular access to the `tpa` and `home` features, and to
-teleport to `warp`s:
+Grant all players full regular access to the `tpa` and `home` features, to
+teleport to `warp`s, and to use `/rtp`:
 
 ```
 /lp group default permission set essentialcommands.tpa true
@@ -39,6 +39,8 @@ teleport to `warp`s:
 
 /lp group default permission set essentialcommands.home.{set,tp,delete} true
 /lp group default permission set essentialcommands.warp.tp true
+
+/lp group default permission set essentialcommands.randomteleport
 ```
 
 Create a group called `admin` and grant it access to create and delete `warp`s:
@@ -77,7 +79,8 @@ this:
                 "essentialcommands.home.set": true,
                 "essentialcommands.home.tp": true,
                 "essentialcommands.home.delete": true,
-                "essentialcommands.warp.tp": true
+                "essentialcommands.warp.tp": true,
+                "essentialcommands.randomteleport": true
             }
         }
     }
@@ -85,8 +88,8 @@ this:
 ```
 
 This creates a role `admin`, with the ability to create and delete `warp`s, and
-grants all players the ability to use the `tpa` and `home` features, and the
-ability to teleport to `warp`s.
+grants all players the ability to use the `tpa` and `home` features, the
+ability to teleport to `warp`s, and access to the `/rtp` command.
 
 <!-- tabs:end -->
 
