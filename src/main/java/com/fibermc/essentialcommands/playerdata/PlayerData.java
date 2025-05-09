@@ -22,6 +22,7 @@ import com.fibermc.essentialcommands.types.NamedMinecraftLocation;
 import com.fibermc.essentialcommands.util.NicknameTextUtil;
 import io.github.ladysnake.pal.Pal;
 import io.github.ladysnake.pal.VanillaAbilities;
+import me.drex.vanish.api.VanishAPI;
 import org.jetbrains.annotations.NotNull;
 
 import com.mojang.brigadier.context.CommandContext;
@@ -227,11 +228,13 @@ public class PlayerData extends PersistentState implements IServerPlayerEntityDa
                 Pal.grantAbility(this.player, VanillaAbilities.INVULNERABLE, ECAbilitySources.AFK_INVULN);
             }
 
-            this.player.server.getPlayerManager().broadcast(
-                ECText.getInstance().getText(
-                    "player.afk.enter",
-                    this.player.getDisplayName()),
-                false);
+            if (!EssentialCommands.VANISH_PRESENT || !VanishAPI.isVanished(player)) {
+                this.player.server.getPlayerManager().broadcast(
+                    ECText.getInstance().getText(
+                        "player.afk.enter",
+                        this.player.getDisplayName()),
+                    false);
+            }
 
             // This assignment should happen after the message, otherwise
             // `getDisplayName` will include the `[AFK]` prefix.
@@ -243,11 +246,13 @@ public class PlayerData extends PersistentState implements IServerPlayerEntityDa
 
             Pal.revokeAbility(this.player, VanillaAbilities.INVULNERABLE, ECAbilitySources.AFK_INVULN);
 
-            this.player.server.getPlayerManager().broadcast(
-                ECText.getInstance().getText(
-                    "player.afk.exit",
-                    this.player.getDisplayName()),
-                false);
+            if (!EssentialCommands.VANISH_PRESENT || !VanishAPI.isVanished(player)) {
+                this.player.server.getPlayerManager().broadcast(
+                    ECText.getInstance().getText(
+                        "player.afk.exit",
+                        this.player.getDisplayName()),
+                    false);
+            }
         }
 
         PlayerDataManager.getInstance().markNicknameDirty(this);
