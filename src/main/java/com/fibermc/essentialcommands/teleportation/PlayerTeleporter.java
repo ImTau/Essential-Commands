@@ -15,11 +15,13 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.SpawnReason;
 import net.minecraft.entity.passive.TameableEntity;
-import net.minecraft.nbt.NbtCompound;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
+import net.minecraft.storage.NbtReadView;
+import net.minecraft.storage.NbtWriteView;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
+import net.minecraft.util.ErrorReporter;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Box;
 import net.minecraft.util.math.Vec3d;
@@ -30,6 +32,8 @@ import static com.fibermc.essentialcommands.EssentialCommands.CONFIG;
 
 public final class PlayerTeleporter {
     private static final Logger LOGGER = LogManager.getLogger("PlayerTeleporter");
+    private static ErrorReporter errorReporter = new ErrorReporter.Impl();
+
     private PlayerTeleporter() {}
 
     public static void requestTeleport(PlayerData pData, MinecraftLocation dest, MutableText destName) {
@@ -158,10 +162,12 @@ public final class PlayerTeleporter {
      * @return true if the entity was successfully transferred, false otherwise
      */
     private static boolean transferEntityToWorld(TameableEntity pet, ServerWorld targetWorld, Vec3d targetVec, ServerPlayerEntity playerEntity) {
-        NbtCompound entityData = new NbtCompound();
-        pet.saveSelfNbt(entityData); // Store full entity data
+        NbtWriteView entityData = NbtWriteView.create(errorReporter);
+//        entityData.
+        pet.saveSelfData(entityData); // Store full entity data
 
-        Entity newPet = EntityType.loadEntityWithPassengers(entityData, targetWorld, SpawnReason.COMMAND, (e) -> {
+        var entityDataReadView = NbtReadView.create(errorReporter, targetWorld.getRegistryManager(), entityData.getNbt());
+        Entity newPet = EntityType.loadEntityWithPassengers(entityDataReadView, targetWorld, SpawnReason.COMMAND, (e) -> {
             e.setPos(targetVec.x, targetVec.y, targetVec.z);
             return e;
         });

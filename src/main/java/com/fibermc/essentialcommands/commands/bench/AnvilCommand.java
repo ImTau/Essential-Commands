@@ -14,7 +14,7 @@ public class AnvilCommand extends SimpleScreenCommand {
         new AnvilCommandScreenHandler(
             syncId,
             inventory,
-            ScreenHandlerContext.create(player.getEntityWorld(), player.getBlockPos())
+            ScreenHandlerContext.create(player.getWorld(), player.getBlockPos())
         );
 
     @Override

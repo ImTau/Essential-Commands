@@ -9,11 +9,13 @@ import com.mojang.authlib.ProfileLookupCallback;
 import net.minecraft.network.packet.c2s.common.SyncedClientOptions;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.util.ErrorReporter;
 
 public class OfflinePlayerRepo {
 
     private final HashMap<String, GameProfile> gameProfileCache = new HashMap<>();
     private final MinecraftServer server;
+    private final ErrorReporter errorReporter = new ErrorReporter.Impl();
 
     public OfflinePlayerRepo(MinecraftServer server) {
         this.server = server;
@@ -33,7 +35,7 @@ public class OfflinePlayerRepo {
             playerProfile,
             SyncedClientOptions.createDefault());
 
-        server.getPlayerManager().loadPlayerData(player);
+        server.getPlayerManager().loadPlayerData(player, errorReporter);
 
         return player;
     }

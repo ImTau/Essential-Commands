@@ -8,7 +8,6 @@ import java.util.stream.Stream;
 import me.lucko.fabric.api.permissions.v0.Permissions;
 import org.jetbrains.annotations.NotNull;
 
-import net.minecraft.command.CommandSource;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.server.network.ServerPlayerEntity;
 
@@ -112,7 +111,7 @@ public final class ECPerms {
         });
     }
 
-    private static boolean isSuperAdmin(CommandSource source) {
+    private static boolean isSuperAdmin(ServerCommandSource source) {
         return source.hasPermissionLevel(4);
     }
 
@@ -124,7 +123,7 @@ public final class ECPerms {
         return player -> checkAny(player, permissions, defaultRequireLevel);
     }
 
-    public static boolean check(@NotNull CommandSource source, @NotNull String permission, int defaultRequireLevel) {
+    public static boolean check(@NotNull ServerCommandSource source, @NotNull String permission, int defaultRequireLevel) {
         if (CONFIG.USE_PERMISSIONS_API) {
             try {
                 // TODO: In the future, config option for granting ops all perms.
@@ -138,11 +137,11 @@ public final class ECPerms {
         }
     }
 
-    public static boolean check(@NotNull CommandSource source, @NotNull String permission) {
+    public static boolean check(@NotNull ServerCommandSource source, @NotNull String permission) {
         return check(source, permission, 4);
     }
 
-    public static boolean checkAny(@NotNull CommandSource source, @NotNull String[] permissions, int defaultRequireLevel) {
+    public static boolean checkAny(@NotNull ServerCommandSource source, @NotNull String[] permissions, int defaultRequireLevel) {
         for (String permission : permissions) {
             if (check(source, permission, defaultRequireLevel)) {
                 return true;
@@ -155,7 +154,7 @@ public final class ECPerms {
         return Integer.parseInt(permission.substring(permission.lastIndexOf('.') + 1));
     }
 
-    public static int getHighestNumericPermission(@NotNull CommandSource source, @NotNull String[] permissionGroup) {
+    public static int getHighestNumericPermission(@NotNull ServerCommandSource source, @NotNull String[] permissionGroup) {
         // No effective numeric limits for ops.
         if (isSuperAdmin(source)) {
             return Integer.MAX_VALUE;

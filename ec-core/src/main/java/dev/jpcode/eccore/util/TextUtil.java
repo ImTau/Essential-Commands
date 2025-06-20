@@ -8,11 +8,13 @@ import java.util.function.Supplier;
 import java.util.stream.Collector;
 
 import com.google.gson.JsonParseException;
+import com.google.gson.JsonParser;
 import eu.pb4.placeholders.api.ParserContext;
 import eu.pb4.placeholders.api.parsers.TagParser;
 import org.apache.logging.log4j.Level;
 
-import net.minecraft.registry.DynamicRegistryManager;
+import com.mojang.serialization.JsonOps;
+
 import net.minecraft.text.*;
 
 import dev.jpcode.eccore.ECCore;
@@ -179,6 +181,13 @@ public final class TextUtil {
         return originalText.setStyle(outStyle);
     }
 
+    public static String toJsonString(Text text) {
+        return TextCodecs.CODEC
+            .encodeStart(JsonOps.INSTANCE, text)
+            .getOrThrow()
+            .toString();
+    }
+
     private static final Collection<StringToTextParser> TEXT_PARSERS = new ArrayList<>();
 
     /**
@@ -189,7 +198,7 @@ public final class TextUtil {
     }
 
     static {
-        registerTextParser(str -> Text.Serialization.fromJson(str, DynamicRegistryManager.EMPTY));
+        registerTextParser(str -> TextCodecs.CODEC.parse(JsonOps.INSTANCE, JsonParser.parseString(str)).getOrThrow());
         int javaVersion = Util.getJavaVersion();
         if (javaVersion >= 16) {
             ECCore.LOGGER.log(Level.INFO, String.format(

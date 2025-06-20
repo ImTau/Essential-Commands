@@ -3,9 +3,11 @@ package dev.jpcode.eccore.util;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import net.minecraft.registry.DynamicRegistryManager;
+import com.mojang.serialization.JsonOps;
+
 import net.minecraft.text.Style;
 import net.minecraft.text.Text;
+import net.minecraft.text.TextCodecs;
 import net.minecraft.util.Formatting;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -40,9 +42,10 @@ public class TextUtilTests {
     @DisplayName("from-to json is remotely sane")
     void fromToJson_isSane()
     {
-        var nullJsonStr = Text.Serialization.toJsonString(Text.literal(" hi there! "), DynamicRegistryManager.EMPTY);
-        var parsedStyleFromNull = Text.Serialization.fromJson(nullJsonStr, DynamicRegistryManager.EMPTY);
-
+        var nullJsonStr = TextCodecs.CODEC.encodeStart(JsonOps.INSTANCE, Text.literal(" hi there! "))
+            .getOrThrow();
+        var parsedStyleFromNull = TextCodecs.CODEC.parse(JsonOps.INSTANCE, nullJsonStr)
+            .getOrThrow();
         assert parsedStyleFromNull == null;
     }
 }

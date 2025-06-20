@@ -56,7 +56,7 @@ public class BedCommand implements Command<ServerCommandSource> {
             return Optional.empty();
         }
 
-        ServerWorld world = player.server.getWorld(respawn.dimension());
+        ServerWorld world = player.getServer().getWorld(respawn.dimension());
         var spawnPos = respawn.pos();
 
         // Safe Position Calculation, based on the game respawn position calculation logic,

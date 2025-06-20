@@ -86,7 +86,7 @@ public class PlayerData extends PersistentState implements IServerPlayerEntityDa
     public PlayerData(ServerPlayerEntity player, File saveFile) {
         this.player = player;
         this.lastTickPos = player.getPos();
-        this.lastActionTick = player.server.getTicks();
+        this.lastActionTick = player.getServer().getTicks();
         this.pUuid = player.getUuid();
         this.saveFile = saveFile;
         incomingTeleportRequests = new LinkedHashMap<>();
@@ -229,7 +229,7 @@ public class PlayerData extends PersistentState implements IServerPlayerEntityDa
             }
 
             if (!EssentialCommands.VANISH_PRESENT || !VanishAPI.isVanished(player)) {
-                this.player.server.getPlayerManager().broadcast(
+                this.player.getServer().getPlayerManager().broadcast(
                     ECText.getInstance().getText(
                         "player.afk.enter",
                         this.player.getDisplayName()),
@@ -247,7 +247,7 @@ public class PlayerData extends PersistentState implements IServerPlayerEntityDa
             Pal.revokeAbility(this.player, VanillaAbilities.INVULNERABLE, ECAbilitySources.AFK_INVULN);
 
             if (!EssentialCommands.VANISH_PRESENT || !VanishAPI.isVanished(player)) {
-                this.player.server.getPlayerManager().broadcast(
+                this.player.getServer().getPlayerManager().broadcast(
                     ECText.getInstance().getText(
                         "player.afk.exit",
                         this.player.getDisplayName()),
@@ -263,7 +263,7 @@ public class PlayerData extends PersistentState implements IServerPlayerEntityDa
     }
 
     public void onTickEnd() {
-        var ticks = player.server.getTicks();
+        var ticks = player.getServer().getTicks();
         var currentPos = player.getPos();
         hasMovedThisTick = !this.lastTickPos.equals(currentPos);
         if (hasMovedThisTick) {
@@ -312,11 +312,11 @@ public class PlayerData extends PersistentState implements IServerPlayerEntityDa
     }
 
     public int ticksSinceLastActionOrMove() {
-        return player.server.getTicks() - Math.max(lastMovedTick, lastActionTick);
+        return player.getServer().getTicks() - Math.max(lastMovedTick, lastActionTick);
     }
 
     public void updateLastActionTick() {
-        this.lastActionTick = player.server.getTicks();
+        this.lastActionTick = player.getServer().getTicks();
     }
 
     public boolean isSleepingFromCommand() {
@@ -353,7 +353,7 @@ public class PlayerData extends PersistentState implements IServerPlayerEntityDa
             if ("null".equals(nick)) {
                 return;
             }
-            this.nickname = Text.Serialization.fromJson(nick, wrapperLookup);
+            this.nickname = TextUtil.parseText(nick);
             try {
                 reloadFullNickname();
             } catch (NullPointerException ignore) {
@@ -383,7 +383,7 @@ public class PlayerData extends PersistentState implements IServerPlayerEntityDa
         tag.put(StorageKey.HOMES, homesNbt);
 
         if (nickname != null) {
-            tag.putString(StorageKey.NICKNAME, Text.Serialization.toJsonString(nickname, wrapperLookup));
+            tag.putString(StorageKey.NICKNAME, TextUtil.toJsonString(nickname));
         }
 
         tag.putLong(StorageKey.TIME_USED_RTP_EPOCH_MS, TimeUtil.tickTimeToEpochMs(timeUsedRtp));
