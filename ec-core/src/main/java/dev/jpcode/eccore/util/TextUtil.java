@@ -7,7 +7,6 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collector;
 
-import com.google.gson.JsonParseException;
 import com.google.gson.JsonParser;
 import eu.pb4.placeholders.api.ParserContext;
 import eu.pb4.placeholders.api.parsers.TagParser;
@@ -221,7 +220,7 @@ public final class TextUtil {
         for (StringToTextParser parser : TEXT_PARSERS) {
             try {
                 outText = parser.parseText(textStr);
-            } catch (JsonParseException e) {
+            } catch (Exception e) {
                 // ign
             }
 
