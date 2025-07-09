@@ -88,6 +88,7 @@ public class PlayerData extends PersistentState implements IServerPlayerEntityDa
 
     public PlayerData(ServerPlayerEntity player, File saveFile) {
         incomingTeleportRequests = new LinkedHashMap<>();
+        homes = new NamedLocationStorage();
         initializeRuntimeState(player, saveFile);
     }
 

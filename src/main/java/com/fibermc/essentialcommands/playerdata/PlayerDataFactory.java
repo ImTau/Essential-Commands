@@ -13,6 +13,7 @@ import org.apache.logging.log4j.Level;
 
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtIo;
+import net.minecraft.nbt.NbtOps;
 import net.minecraft.nbt.NbtSizeTracker;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayerEntity;
@@ -21,8 +22,6 @@ public final class PlayerDataFactory {
     private PlayerDataFactory() {}
 
     private static PlayerData create(ServerPlayerEntity player, File playerDataFile) {
-        PlayerData pData = new PlayerData(player, playerDataFile);
-
         boolean fileExisted = false;
 
         try {
@@ -33,21 +32,26 @@ public final class PlayerDataFactory {
 
         if (fileExisted && playerDataFile.length() != 0) {
             try {
-                pData.fromNbt(
+                var playerData = PlayerData.CODEC.parse(
+                    NbtOps.INSTANCE,
                     NbtIo.readCompressed(playerDataFile.toPath(), NbtSizeTracker.ofUnlimitedBytes())
-                );
+                ).getOrThrow();
+                playerData.initializeRuntimeState(player, playerDataFile);
+                return playerData;
             } catch (IOException e) {
                 EssentialCommands.log(
                     Level.WARN,
                     "Failed to load essential_commands player data for {%s}", player.getName().getString());
                 e.printStackTrace();
+//                Files.copy(playerDataFile.toPath(), Path.of(playerDataFile.toPath() + ".bk"));
+                return new PlayerData(player, playerDataFile);
             }
         } else {
+            PlayerData pData = new PlayerData(player, playerDataFile);
             pData.markDirty();
             pData.save();
+            return pData;
         }
-
-        return pData;
     }
 
     /**

@@ -213,7 +213,6 @@ public final class PlayerTeleporter {
         );
     }
 
-
     static boolean playerHasTpRulesBypass(ServerPlayerEntity player, String permission) {
         return (
             (player.hasPermissionLevel(4) && CONFIG.OPS_BYPASS_TELEPORT_RULES)

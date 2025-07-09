@@ -140,7 +140,7 @@ public class WorldDataManager extends PersistentState {
     }
 
     public Optional<MinecraftLocation> getSpawn() {
-        return Optional.ofNullable(this.data.getSpawn());
+        return this.data.getSpawn();
     }
 
 }

@@ -1,5 +1,7 @@
 package com.fibermc.essentialcommands;
 
+import java.util.Optional;
+
 import com.fibermc.essentialcommands.codec.Codecs;
 import com.fibermc.essentialcommands.types.MinecraftLocation;
 import com.fibermc.essentialcommands.types.WarpStorage;
@@ -21,8 +23,8 @@ public class WorldData {
         this.warps = new WarpStorage();
     }
 
-    WorldData(@Nullable MinecraftLocation spawnLocation, @NotNull WarpStorage warps) {
-        this.spawnLocation = spawnLocation;
+    WorldData(Optional<MinecraftLocation> spawnLocation, @NotNull WarpStorage warps) {
+        this.spawnLocation = spawnLocation.orElse(null);
         this.warps = warps;
     }
 
@@ -30,8 +32,8 @@ public class WorldData {
         return this.warps;
     }
 
-    public MinecraftLocation getSpawn() {
-        return this.spawnLocation;
+    public Optional<MinecraftLocation> getSpawn() {
+        return Optional.ofNullable(this.spawnLocation);
     }
 
     public void setSpawn(@Nullable MinecraftLocation spawn) {
@@ -48,7 +50,7 @@ public class WorldData {
 
     public static final Codec<WorldData> CODEC = RecordCodecBuilder.create(instance ->
         instance.group(
-            Codecs.MINECRAFT_LOCATION.fieldOf("spawn").forGetter(WorldData::getSpawn),
+            Codecs.MINECRAFT_LOCATION.optionalFieldOf("spawn").forGetter(WorldData::getSpawn),
             Codecs.WARP_STORAGE.fieldOf("warps").forGetter(WorldData::warps)
         ).apply(instance, WorldData::new)
     );
