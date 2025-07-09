@@ -2,10 +2,12 @@ package com.fibermc.essentialcommands.commands;
 
 import com.fibermc.essentialcommands.ManagerLocator;
 import com.fibermc.essentialcommands.playerdata.PlayerData;
+import com.fibermc.essentialcommands.playerdata.PlayerProfile;
 import com.fibermc.essentialcommands.teleportation.TeleportManager;
 import com.fibermc.essentialcommands.teleportation.TeleportRequest;
 import com.fibermc.essentialcommands.text.ChatConfirmationPrompt;
 import com.fibermc.essentialcommands.text.ECText;
+import com.fibermc.essentialcommands.text.TextFormatType;
 
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.context.CommandContext;
@@ -41,9 +43,10 @@ public class TeleportAskCommand implements Command<ServerCommandSource> {
 
         //inform target player of tp request via chat
         var targetPlayerEcText = ECText.access(targetPlayer);
+        var targetPlayerProfile = PlayerProfile.access(targetPlayer);
         targetPlayerData.sendMessage(
             "cmd.tpask.receive",
-            targetPlayerEcText.accent(senderPlayer.getNameForScoreboard())
+            senderPlayer.getDisplayName().copy().fillStyle(targetPlayerProfile.getStyle(TextFormatType.Accent))
         );
 
         String senderName = senderPlayer.getGameProfile().getName();
@@ -59,7 +62,8 @@ public class TeleportAskCommand implements Command<ServerCommandSource> {
         tpMgr.startTpRequest(senderPlayer, targetPlayer, TeleportRequest.Type.TPA_TO);
 
         //inform command sender that request has been sent
-        var targetPlayerText = ECText.access(senderPlayer).accent(targetPlayer.getNameForScoreboard());
+        var senderPlayerProfile = PlayerProfile.access(senderPlayer);
+        var targetPlayerText = targetPlayer.getDisplayName().copy().fillStyle(senderPlayerProfile.getStyle(TextFormatType.Accent));
         senderPlayerData.sendCommandFeedback("cmd.tpask.send", targetPlayerText);
 
         return SINGLE_SUCCESS;

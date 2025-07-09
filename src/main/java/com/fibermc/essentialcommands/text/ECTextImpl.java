@@ -1,10 +1,11 @@
 package com.fibermc.essentialcommands.text;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
+import java.util.function.Function;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
+import com.fibermc.essentialcommands.EssentialCommands;
 import com.fibermc.essentialcommands.types.IStyleProvider;
 import eu.pb4.placeholders.api.ParserContext;
 import eu.pb4.placeholders.api.PlaceholderContext;
@@ -12,8 +13,11 @@ import eu.pb4.placeholders.api.parsers.NodeParser;
 import eu.pb4.placeholders.api.parsers.TagLikeParser;
 import org.jetbrains.annotations.Nullable;
 
+import com.mojang.serialization.JsonOps;
+
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.text.*;
+import net.minecraft.util.Formatting;
 
 public class ECTextImpl extends ECText {
     private final ParserContext parserContext;
@@ -105,6 +109,10 @@ public class ECTextImpl extends ECText {
         );
     }
 
+    private static int hashText(Text text) {
+        return Objects.hash(text.getContent(), text.getStyle());
+    }
+
     public MutableText getTextInternal(
         String key,
         TextFormatType textFormatType,
@@ -112,6 +120,9 @@ public class ECTextImpl extends ECText {
         Text... args)
     {
         var argsList = Arrays.stream(args).map(Text::copy).toList();
+        var argsHashes = argsList.stream()
+            .map(ECTextImpl::hashText)
+            .collect(Collectors.toCollection(HashSet::new));
 
         var parser = parserForContext(textFormatType, styleProvider, argsList);
         var parsedText = parser.parseText(
@@ -122,9 +133,51 @@ public class ECTextImpl extends ECText {
         var specifiedStyle = styleProvider == null
             ? textFormatType.getStyle()
             : styleProvider.getStyle(textFormatType);
-        var ret = Text.empty();
-        parsedText.getWithStyle(specifiedStyle).forEach(ret::append);
+
+        EssentialCommands.LOGGER.info(TextCodecs.CODEC.encodeStart(JsonOps.INSTANCE, parsedText));
+        var ret = visitText(
+            parsedText,
+            defaultStylesVisitor(
+                // currently using reference equality -- if internals of TextPlaceholderAPI change, this might not be ok
+                (node) -> argsHashes.contains(hashText(node))
+                    ? DEFAULT_ARGUMENT_STYLE
+                    : specifiedStyle
+            ),
+            // we should stop traversal downward in the tree when we hit one of the args
+            (node) -> argsHashes.contains(hashText(node))
+        );
+        EssentialCommands.LOGGER.info(TextCodecs.CODEC.encodeStart(JsonOps.INSTANCE, ret));
         return ret;
+    }
+
+    interface TextVisitor {
+        MutableText accept(Text text);
+    }
+
+    private static final Style DEFAULT_ARGUMENT_STYLE = Style.EMPTY.withColor(Formatting.WHITE);
+
+    TextVisitor defaultStylesVisitor(Function<Text, @Nullable Style> defaultStyleProvider) {
+        return text -> {
+            MutableText txt = text.copy();
+            var defaultStyleForText = defaultStyleProvider.apply(txt);
+            if (defaultStyleForText != null) {
+                txt.setStyle(txt.getStyle().withParent(defaultStyleForText));
+            }
+            return txt;
+        };
+    }
+
+    MutableText visitText(Text root, TextVisitor textVisitor, Predicate<Text> shouldStopAfter) {
+        var txt = textVisitor.accept(root);
+        if (shouldStopAfter.test(root)) {
+            return txt;
+        }
+        var siblings = txt.getSiblings();
+        for (int i = 0; i < siblings.size(); i++) {
+            // DO NOT USE replaceAll here it may lead to exceptions (may be unsupported)
+            siblings.set(i, visitText(siblings.get(i), textVisitor, shouldStopAfter));
+        }
+        return txt;
     }
 
     public boolean hasTranslation(String key) {
