@@ -113,15 +113,11 @@ public final class WorldDataDataFixer {
         }
     }
 
-    // DataFixer setup
     public static DataFixerBuilder createDataFixer() {
         DataFixerBuilder builder = new DataFixerBuilder(1);
 
-        // Add schemas in order
-        Schema v0Schema = builder.addSchema(0, V0::new);
+        builder.addSchema(0, V0::new);
         Schema v1Schema = builder.addSchema(1, V1::new);
-
-        // Add the fix between versions
         builder.addFixer(new RemoveEmptyObjectSpawnFix(v1Schema));
 
         return builder;
