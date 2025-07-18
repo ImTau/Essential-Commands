@@ -5,15 +5,12 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
-import com.fibermc.essentialcommands.EssentialCommands;
 import com.fibermc.essentialcommands.types.IStyleProvider;
 import eu.pb4.placeholders.api.ParserContext;
 import eu.pb4.placeholders.api.PlaceholderContext;
 import eu.pb4.placeholders.api.parsers.NodeParser;
 import eu.pb4.placeholders.api.parsers.TagLikeParser;
 import org.jetbrains.annotations.Nullable;
-
-import com.mojang.serialization.JsonOps;
 
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.text.*;
@@ -134,8 +131,7 @@ public class ECTextImpl extends ECText {
             ? textFormatType.getStyle()
             : styleProvider.getStyle(textFormatType);
 
-        EssentialCommands.LOGGER.info(TextCodecs.CODEC.encodeStart(JsonOps.INSTANCE, parsedText));
-        var ret = visitText(
+        return visitText(
             parsedText,
             defaultStylesVisitor(
                 // currently using reference equality -- if internals of TextPlaceholderAPI change, this might not be ok
@@ -146,8 +142,6 @@ public class ECTextImpl extends ECText {
             // we should stop traversal downward in the tree when we hit one of the args
             (node) -> argsHashes.contains(hashText(node))
         );
-        EssentialCommands.LOGGER.info(TextCodecs.CODEC.encodeStart(JsonOps.INSTANCE, ret));
-        return ret;
     }
 
     interface TextVisitor {
