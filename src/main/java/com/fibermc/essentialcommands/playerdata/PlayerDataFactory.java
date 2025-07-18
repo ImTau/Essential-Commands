@@ -33,12 +33,12 @@ public final class PlayerDataFactory {
         if (fileExisted && playerDataFile.length() != 0) {
             try {
                 var tag = NbtIo.readCompressed(playerDataFile.toPath(), NbtSizeTracker.ofUnlimitedBytes());
-                // Handle legacy "data" wrapper if present
-                NbtCompound dataTag = tag.getCompound("data").orElse(tag);
+
+                tag = PlayerData.fixData(tag);
 
                 var playerData = PlayerData.CODEC.parse(
                     NbtOps.INSTANCE,
-                    dataTag
+                    tag
                 ).getOrThrow();
                 playerData.initializeRuntimeState(player, playerDataFile);
 

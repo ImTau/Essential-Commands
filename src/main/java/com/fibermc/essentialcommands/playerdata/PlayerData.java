@@ -12,6 +12,7 @@ import com.fibermc.essentialcommands.codec.Codecs;
 import com.fibermc.essentialcommands.commands.CommandUtil;
 import com.fibermc.essentialcommands.commands.InvulnCommand;
 import com.fibermc.essentialcommands.commands.helpers.IFeedbackReceiver;
+import com.fibermc.essentialcommands.datafixer.PlayerDataDataFixer;
 import com.fibermc.essentialcommands.events.PlayerActCallback;
 import com.fibermc.essentialcommands.teleportation.OutgoingTeleportRequests;
 import com.fibermc.essentialcommands.teleportation.TeleportRequest;
@@ -28,11 +29,14 @@ import org.jetbrains.annotations.NotNull;
 
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import com.mojang.datafixers.DataFixer;
 import com.mojang.serialization.Codec;
+import com.mojang.serialization.Dynamic;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 
 import net.minecraft.entity.player.PlayerAbilities;
 import net.minecraft.nbt.NbtCompound;
+import net.minecraft.nbt.NbtElement;
 import net.minecraft.nbt.NbtIo;
 import net.minecraft.nbt.NbtOps;
 import net.minecraft.server.command.ServerCommandSource;
@@ -117,7 +121,7 @@ public class PlayerData extends PersistentState implements IServerPlayerEntityDa
     }
 
     public static PlayerData createWithData(
-        NamedLocationStorage homes,
+        Optional<NamedLocationStorage> homes,
         Optional<MinecraftLocation> previousLocation,
         Optional<Text> nickname,
         long timeUsedRtpEpochMs,
@@ -126,7 +130,7 @@ public class PlayerData extends PersistentState implements IServerPlayerEntityDa
         // This creates a PlayerData with serializable state only
         // Runtime state will be initialized by your factory methods
         PlayerData pd = new PlayerData();
-        pd.homes = homes;
+        pd.homes = homes.orElseGet(NamedLocationStorage::new);
         pd.previousLocation = previousLocation.orElse(null);
         pd.nickname = nickname.orElse(null);
         pd.timeUsedRtp = TimeUtil.epochTimeMsToTicks(timeUsedRtpEpochMs);
@@ -138,6 +142,7 @@ public class PlayerData extends PersistentState implements IServerPlayerEntityDa
     {
         this.saveFile = saveFile;
     }
+
     // Initialize runtime state after deserialization
     public void initializeRuntimeState(ServerPlayerEntity player, File saveFile) {
         initializeSaveFileField(saveFile);
@@ -169,6 +174,23 @@ public class PlayerData extends PersistentState implements IServerPlayerEntityDa
         }
 
         updatePlayerEntity(player);
+    }
+
+    private static final DataFixer _playerDataDataFixer = PlayerDataDataFixer.createDataFixer().build().fixer();
+    private static final String SCHEMA_VERSION_KEY = "_sv";
+    private static final int SCHEMA_VERSION = 1;
+
+    public static NbtCompound fixData(NbtCompound nbt) {
+        // Handle legacy "data" wrapper if present
+        nbt = nbt.getCompound("data").orElse(nbt);
+        nbt = _playerDataDataFixer.update(
+            PlayerDataDataFixer.TYPE,
+            new Dynamic<NbtElement>(NbtOps.INSTANCE, nbt),
+            nbt.getInt(SCHEMA_VERSION_KEY, 0),
+            SCHEMA_VERSION
+        ).getValue().asCompound().orElseThrow();
+
+        return nbt;
     }
 
     public OutgoingTeleportRequests getSentTeleportRequests() {
@@ -578,8 +600,8 @@ public class PlayerData extends PersistentState implements IServerPlayerEntityDa
         instance.group(
             // Homes storage
             NamedLocationStorage.CODEC
-                .optionalFieldOf("homes", new NamedLocationStorage())
-                .forGetter(pd -> pd.homes),
+                .optionalFieldOf("homes")
+                .forGetter(pd -> Optional.ofNullable(pd.homes)),
 
             // Previous location for /back
             Codecs.MINECRAFT_LOCATION

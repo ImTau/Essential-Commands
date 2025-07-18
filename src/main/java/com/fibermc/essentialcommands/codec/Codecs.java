@@ -62,7 +62,7 @@ public final class Codecs {
     );
 
     public static final Codec<NamedLocationStorage> NAMED_LOCATION_STORAGE =
-        Codec.unboundedMap(Codec.STRING, MINECRAFT_LOCATION)
+        Codec.unboundedMap(Codec.STRING, NAMED_MINECRAFT_LOCATION)
             .xmap(
                 // Convert Map to NamedLocationStorage
                 map -> {
