@@ -12,5 +12,6 @@ with a tool like [NBT Explorer](https://github.com/jaquadro/NBTExplorer).
 File Contents | Location
 ---|---
 Config  | `config/EssentialCommands.properties`
+Rules  | `config/essentialcommands/rules.txt`
 World Data (warps, spawn)   | `world/essentialcommands/world_data.dat`
 Player Data (homes, nickname, etc.) | `world/modplayerdata/PLAYER_UUID.dat`
