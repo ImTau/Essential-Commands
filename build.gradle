@@ -217,7 +217,8 @@ modrinth {
     ].findAll { it }.flatten()
 }
 
-task publishModrinth(type: TaskModrinthUpload) { // Make sure it runs after build!
+//type:
+tasks.register("publishModrinth", TaskModrinthUpload) { // Make sure it runs after build!
     description 'Uploads all Modrinth projects'
     group 'upload'
 
@@ -300,7 +301,7 @@ curseforge {
     }
 }
 
-task publishCurseForge {
+tasks.register("publishCurseForge") {
     description 'Uploads to CurseForge'
     group 'upload'
 
@@ -311,7 +312,7 @@ task publishCurseForge {
     }
 }
 
-task publishGithubRelease (type: GithubReleaseTask){
+tasks.register("publishGithubRelease", GithubReleaseTask) {
     description 'Creates a GitHub Release for the project'
     group 'upload'
 

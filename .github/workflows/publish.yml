@@ -74,7 +74,7 @@ jobs:
           GITHUB_ACTOR: ${{ github.actor }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           IS_PIPELINE: true
-        run: gradle publish
+        run: gradle publishMavenJavaPublicationToGitHubRepository
 
       - name: 📤 Publish to Modrinth
         env:
