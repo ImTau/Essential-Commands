@@ -209,13 +209,16 @@ modrinth {
     changelog = readLatestChangelogSection()
     loaders = ['fabric']
 
-    dependencies = [
-        project.mr_relations_required?.split(',')?.findAll { it?.trim() }?.collect { required.project it },
-        project.mr_relations_optional?.split(',')?.findAll { it?.trim() }?.collect { optional.project it },
-        project.mr_relations_embedded?.split(',')?.findAll { it?.trim() }?.collect { embedded.project it },
-        project.mr_relations_incompatible?.split(',')?.findAll { it?.trim() }?.collect { incompatible.project it },
-    ].findAll { it }.flatten()
+    debugMode = false
+
+    dependencies {
+        if (project.mr_relations_required?.trim()) project.mr_relations_required.split(',').each { required.project(it.trim()) }
+        if (project.mr_relations_optional?.trim()) project.mr_relations_optional.split(',').each { optional.project(it.trim()) }
+        if (project.mr_relations_embedded?.trim()) project.mr_relations_embedded.split(',').each { embedded.project(it.trim()) }
+        if (project.mr_relations_incompatible?.trim()) project.mr_relations_incompatible.split(',').each { incompatible.project(it.trim()) }
+    }
 }
+
 
 //type:
 tasks.register("publishModrinth", TaskModrinthUpload) { // Make sure it runs after build!
