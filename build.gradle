@@ -194,6 +194,9 @@ publishing {
 import com.github.breadmoirai.githubreleaseplugin.GithubReleaseTask
 import com.modrinth.minotaur.TaskModrinthUpload
 import com.modrinth.minotaur.request.VersionType
+import io.github.themrmilchmann.gradle.publish.curseforge.ChangelogFormat
+import io.github.themrmilchmann.gradle.publish.curseforge.GameVersion
+import io.github.themrmilchmann.gradle.publish.curseforge.ReleaseType
 
 modrinth {
     token = getenv("MODRINTH")
@@ -234,7 +237,6 @@ tasks.register("publishModrinth", TaskModrinthUpload) { // Make sure it runs aft
     }
 }
 
-// Replace your existing curseforge configuration with this:
 curseforge {
     apiToken = getenv("CURSEFORGE")
 
@@ -244,7 +246,7 @@ curseforge {
 
             // Convert game versions from comma-separated string to GameVersion objects
             project.cf_game_versions.split(',').each { version ->
-                gameVersions.add(new io.github.themrmilchmann.gradle.publish.curseforge.GameVersion("minecraft-java-edition", version.trim()))
+                gameVersions.add(new GameVersion("minecraft-java-edition", version.trim()))
             }
 
             artifacts.register("main") {
@@ -311,7 +313,7 @@ tasks.register("publishCurseForge") {
     description 'Uploads to CurseForge'
     group 'upload'
 
-    dependsOn 'publishMainToCurseForge'
+    dependsOn 'publishMainPublicationToCurseForge'
 
     onlyIf {
         env.containsKey("CURSEFORGE")
