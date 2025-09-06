@@ -210,10 +210,10 @@ modrinth {
     loaders = ['fabric']
 
     dependencies = [
-        project.mr_relations_required?.split(',')?.collect { required.project it },
-        project.mr_relations_optional?.split(',')?.collect { optional.project it },
-        project.mr_relations_embedded?.split(',')?.collect { embedded.project it },
-        project.mr_relations_incompatible?.split(',')?.collect { incompatible.project it },
+        project.mr_relations_required?.split(',')?.findAll { it?.trim() }?.collect { required.project it },
+        project.mr_relations_optional?.split(',')?.findAll { it?.trim() }?.collect { optional.project it },
+        project.mr_relations_embedded?.split(',')?.findAll { it?.trim() }?.collect { embedded.project it },
+        project.mr_relations_incompatible?.split(',')?.findAll { it?.trim() }?.collect { incompatible.project it },
     ].findAll { it }.flatten()
 }
 
