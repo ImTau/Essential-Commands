@@ -12,6 +12,7 @@ build {
     dependsOn ':ec-core:build'
 }
 
+ext.runTimestamp = new Date().format('yyyyMMddHHmmss')
 ext.env = loadenv()
 
 String getenv(String key) {
@@ -363,8 +364,8 @@ def static loadenv(String path = ".env") {
     return env
 }
 
-static def getTimestamp() {
-    return new Date().format('yyyyMMddHHmmss')
+String getTimestamp() {
+    return ext.runTimestamp
 }
 
 ext.cachedChangelog = null
