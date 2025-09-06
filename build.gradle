@@ -29,9 +29,11 @@ allprojects {
 
 
     group = project.maven_group
-    String full_version = Boolean.parseBoolean(getenv("IS_PIPELINE"))
-        ? "${project.mod_version}-mc${project.minecraft_version}+${getTimestamp()}"
+    String vers_suffix = getenv("VERS_SUFFIX")
+    String full_version = vers_suffix != 'NOT FOUND' && vers_suffix != ''
+        ? "${project.mod_version}-mc${project.minecraft_version}+${vers_suffix}"
         : "${project.mod_version}-mc${project.minecraft_version}"
+    println "version: $full_version"
 
     version = full_version
     base.archivesName = "${project.mod_id}"
@@ -211,7 +213,7 @@ modrinth {
     loaders = ['fabric']
 
     debugMode = false
-
+    project.version
     dependencies {
         if (project.mr_relations_required?.trim()) project.mr_relations_required.split(',').each { required.project(it.trim()) }
         if (project.mr_relations_optional?.trim()) project.mr_relations_optional.split(',').each { optional.project(it.trim()) }
