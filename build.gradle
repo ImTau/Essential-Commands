@@ -3,18 +3,16 @@ plugins {
     id 'fabric-loom' version "${loom_version}"
     id 'maven-publish'
     id "com.hypherionmc.modutils.modpublisher" version "2.1.6"
-    // id 'checkstyle'
 }
 
 build {
     dependsOn ':ec-core:build'
 }
 
-ext.runTimestamp = new Date().format('yyyyMMddHHmmss')
 ext.env = loadenv()
 
 String getenv(String key) {
-    return env.getOrDefault(key, "NOT FOUND")
+    return ext.env.getOrDefault(key, "NOT FOUND")
 }
 
 tasks.named('remapJar').configure {
@@ -30,10 +28,11 @@ allprojects {
     String full_version = vers_suffix != 'NOT FOUND' && vers_suffix != ''
         ? "${project.mod_version}-mc${project.minecraft_version}+${vers_suffix}"
         : "${project.mod_version}-mc${project.minecraft_version}"
-    println "version: $full_version"
 
     version = full_version
     base.archivesName = "${project.mod_id}"
+    println "version: $full_version"
+    println "base.archivesName: $base.archivesName"
 
     // Common dependencies for all projects
     dependencies {
@@ -150,9 +149,7 @@ publishing {
     }
     // Add repositories to publish to
     repositories {
-        mavenLocal {
-
-        }
+        mavenLocal { }
         maven {
             name 'GitHub'
             url "https://maven.pkg.github.com/${project.gh_owner}/${project.gh_repo}"
@@ -199,9 +196,9 @@ publisher {
     }
 
     github {
-        repo = "${project.gh_owner}/${project.gh_repo}"
-        tag = project.version as String
-        target = "1.21.x"
+        repo("${project.gh_owner}/${project.gh_repo}")
+        tag(project.version as String)
+        target("1.21.x")
     }
 
     modrinthDepends {
@@ -265,13 +262,9 @@ def static loadenv(String path = ".env") {
         }
     }
     for (el in System.getenv()) {
-        env[el.key] = el.value;
+        env[el.key] = el.value
     }
     return env
-}
-
-String getTimestamp() {
-    return ext.runTimestamp
 }
 
 ext.cachedChangelog = null
@@ -303,18 +296,18 @@ String readLatestChangelogSection() {
     String[] sections = fullChangelog.split('--- --- ---')
     String mostRecentSection = sections[0].trim()
 
-    var dashIdx = project.mod_version.indexOf('-');
-    var plusIdx = project.mod_version.indexOf('+');
+    var dashIdx = project.mod_version.indexOf('-')
+    var plusIdx = project.mod_version.indexOf('+')
     var indexOfMainVersionEnd
         = dashIdx != -1 && plusIdx != -1 ? Math.min(dashIdx, plusIdx)
         : dashIdx != -1                  ? dashIdx
         : plusIdx != -1                  ? plusIdx
-        :                                  project.mod_version.length();
+        :                                  project.mod_version.length()
 
-    var mod_main_version = project.mod_version.substring(0, indexOfMainVersionEnd);
+    var mod_main_version = project.mod_version.substring(0, indexOfMainVersionEnd)
 
     if (!mostRecentSection.contains("v$mod_main_version")) {
-        throw new RuntimeException("Changelog does not contain a section for the current version");
+        throw new RuntimeException("Changelog does not contain a section for the current version")
     }
 
     String suffix = """---
