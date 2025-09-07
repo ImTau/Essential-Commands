@@ -103,6 +103,7 @@ Want to teleport to where you died? Enable `allow_back_on_death` in the
 - /invuln \<target-player>
 - /top
 - /day
+- /night
 - /gametime
 
 ### Config
