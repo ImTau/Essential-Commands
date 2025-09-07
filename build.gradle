@@ -303,7 +303,17 @@ String readLatestChangelogSection() {
     String[] sections = fullChangelog.split('--- --- ---')
     String mostRecentSection = sections[0].trim()
 
-    if (!mostRecentSection.contains("`v$project.mod_version`")) {
+    var dashIdx = project.mod_version.indexOf('-');
+    var plusIdx = project.mod_version.indexOf('+');
+    var indexOfMainVersionEnd
+        = dashIdx != -1 && plusIdx != -1 ? Math.min(dashIdx, plusIdx)
+        : dashIdx != -1                  ? dashIdx
+        : plusIdx != -1                  ? plusIdx
+        :                                  project.mod_version.length();
+
+    var mod_main_version = project.mod_version.substring(0, indexOfMainVersionEnd);
+
+    if (!mostRecentSection.contains("v$mod_main_version")) {
         throw new RuntimeException("Changelog does not contain a section for the current version");
     }
 
