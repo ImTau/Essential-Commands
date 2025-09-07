@@ -53,9 +53,17 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-gradle-
 
+      - name: 📖 Extract current git hash for version suffix
+        id: version_suffix
+        run: |
+          CURRENT_COMMIT_HASH=$(git rev-parse --short HEAD)
+          echo "version_suffix=$CURRENT_COMMIT_HASH" >> $GITHUB_OUTPUT
+          echo "Version suffix will be: $CURRENT_COMMIT_HASH"
+
       - name: 🔨 Build artifacts and Run Tests
         env:
           IS_PIPELINE: true
+          VERSION_SUFFIX: ${{ steps.version_suffix.version_suffix }}
         run: gradle clean build
 
       - name: 📦 Upload artifacts
