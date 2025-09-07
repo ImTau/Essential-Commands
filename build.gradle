@@ -303,12 +303,15 @@ String readLatestChangelogSection() {
     String[] sections = fullChangelog.split('--- --- ---')
     String mostRecentSection = sections[0].trim()
 
+    if (!mostRecentSection.contains("`v$project.mod_version`")) {
+        throw new RuntimeException("Changelog does not contain a section for the current version");
+    }
+
     String suffix = """---
 
 If you discover any bugs, you can report them in the [Issue Tracker](https://github.com/John-Paul-R/Essential-Commands/issues).
 
 Additional conversation can be had in the [dev room discord](https://discord.jpcode.dev/essential-commands).
-mr_relations_optional
 
 """
 
