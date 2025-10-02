@@ -22,14 +22,14 @@ public abstract class QueuedTeleport {
         this.playerData = playerData;
         this.destName = destName;
         this.ticksRemaining = CONFIG.TELEPORT_DELAY_TICKS;
-        this.initialPosition = playerData.getPlayer().getPos();
+        this.initialPosition = playerData.getPlayer().getEntityPos();
     }
 
     public QueuedTeleport(PlayerData playerData, Text destName, int delay) {
         this.playerData = playerData;
         this.destName = destName;
         this.ticksRemaining = delay;
-        this.initialPosition = playerData.getPlayer().getPos();
+        this.initialPosition = playerData.getPlayer().getEntityPos();
     }
 
     public int getTicksRemaining() {

@@ -88,7 +88,7 @@ public final class TeleportManager {
             var playerData = queuedTeleport.getPlayerData();
             if (shouldInterruptTeleportOnMove
                 && playerData.hasMovedThisTick()
-                && playerData.getPlayer().getPos().distanceTo(queuedTeleport.initialPosition) > maxMoveBeforeInterrupt
+                && playerData.getPlayer().getEntityPos().distanceTo(queuedTeleport.initialPosition) > maxMoveBeforeInterrupt
                 && !PlayerTeleporter.playerHasTpRulesBypass(playerData.getPlayer(), ECPerms.Registry.bypass_teleport_interrupt_on_move)
             ) {
                 playerData.sendError("teleport.interrupted.moved");

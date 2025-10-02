@@ -58,8 +58,8 @@ public class MinecraftLocation {
     }
 
     public MinecraftLocation(ServerPlayerEntity player) {
-        this.dim = player.getWorld().getRegistryKey();
-        this.pos = Vec3d.ZERO.add(player.getPos());
+        this.dim = player.getEntityWorld().getRegistryKey();
+        this.pos = Vec3d.ZERO.add(player.getEntityPos());
         this.headYaw = player.getHeadYaw();
         this.pitch = player.getPitch();
     }

@@ -20,7 +20,6 @@ import net.minecraft.entity.EntityType;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
-import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.Vec3d;
 
 public class BedCommand implements Command<ServerCommandSource> {
@@ -56,8 +55,9 @@ public class BedCommand implements Command<ServerCommandSource> {
             return Optional.empty();
         }
 
-        ServerWorld world = player.getServer().getWorld(respawn.dimension());
-        var spawnPos = respawn.pos();
+        var respawnPosData = respawn.respawnData().globalPos();
+        ServerWorld world = player.getEntityWorld().getServer().getWorld(respawnPosData.dimension());
+        var spawnPos = respawnPosData.pos();
 
         // Safe Position Calculation, based on the game respawn position calculation logic,
         // which was basically rewritten because the game code caused the state of the RespawnAnchorBlock to be refreshed.
@@ -65,12 +65,12 @@ public class BedCommand implements Command<ServerCommandSource> {
         BlockState blockState = world.getBlockState(spawnPos);
         Block block = blockState.getBlock();
         if (block instanceof RespawnAnchorBlock
-            && (Integer)blockState.get(RespawnAnchorBlock.CHARGES) > 0 && RespawnAnchorBlock.isNether(world)
+            && blockState.get(RespawnAnchorBlock.CHARGES) > 0 && RespawnAnchorBlock.isNether(world)
         ) {
             Optional<Vec3d> optional = RespawnAnchorBlock.findRespawnPosition(EntityType.PLAYER, world, spawnPos);
             safeSpawnPos = optional.orElseGet(() -> new Vec3d((double) spawnPos.getX() + 0.5, (double) spawnPos.getY() + 1, (double) spawnPos.getZ() + 0.5));
         } else if (block instanceof BedBlock && BedBlock.isBedWorking(world)) {
-            Optional<Vec3d> optional = BedBlock.findWakeUpPosition(EntityType.PLAYER, world, spawnPos, (Direction)blockState.get(BedBlock.FACING), respawn.angle());
+            Optional<Vec3d> optional = BedBlock.findWakeUpPosition(EntityType.PLAYER, world, spawnPos, blockState.get(BedBlock.FACING), respawn.respawnData().pitch());
             safeSpawnPos = optional.orElseGet(() -> new Vec3d((double) spawnPos.getX() + 0.5, (double) spawnPos.getY() + 0.5625, (double) spawnPos.getZ() + 0.5));
         } else {
             boolean bl = block.canMobSpawnInside(blockState);
@@ -83,6 +83,6 @@ public class BedCommand implements Command<ServerCommandSource> {
             }
         }
 
-        return Optional.of(new MinecraftLocation(respawn.dimension(), safeSpawnPos.getX(), safeSpawnPos.getY(), safeSpawnPos.getZ()));
+        return Optional.of(new MinecraftLocation(respawnPosData.dimension(), safeSpawnPos.getX(), safeSpawnPos.getY(), safeSpawnPos.getZ()));
     }
 }

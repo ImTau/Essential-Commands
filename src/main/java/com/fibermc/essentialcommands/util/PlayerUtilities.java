@@ -11,7 +11,7 @@ public final class PlayerUtilities {
     private PlayerUtilities() {}
 
     public static boolean isNearAngryMonsters(ServerPlayerEntity player) {
-        var world = player.getWorld();
+        var world = player.getEntityWorld();
         var pos = player.getBlockPos();
         double boxHorizontalSize = 8.0;
         double boxHeight = 5.0;

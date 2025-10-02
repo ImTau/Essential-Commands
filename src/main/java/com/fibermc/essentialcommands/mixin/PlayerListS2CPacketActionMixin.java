@@ -44,7 +44,7 @@ public class PlayerListS2CPacketActionMixin {
                 var displayName = playerData.getPlayer().getDisplayName();
                 var displayNameString = displayName.asTruncatedString(16);
                 buf.writeString(displayNameString, 16);
-                PacketCodecs.PROPERTY_MAP.encode(buf, entry.profile().getProperties());
+                PacketCodecs.PROPERTY_MAP.encode(buf, entry.profile().properties());
             } else {
                 vanillaWriter.write(buf, entry);
             }

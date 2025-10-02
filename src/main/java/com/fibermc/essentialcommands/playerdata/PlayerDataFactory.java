@@ -122,7 +122,7 @@ public final class PlayerDataFactory {
     }
 
     private static File getPlayerDataFile(ServerPlayerEntity player) throws IOException {
-        return getPlayerDataDirectoryPath(player.getServer())
+        return getPlayerDataDirectoryPath(player.getEntityWorld().getServer())
             .resolve(player.getUuidAsString() + ".dat")
             .toFile();
     }

@@ -49,7 +49,7 @@ public class TeleportAskCommand implements Command<ServerCommandSource> {
             senderPlayer.getDisplayName().copy().fillStyle(targetPlayerProfile.getStyle(TextFormatType.Accent))
         );
 
-        String senderName = senderPlayer.getGameProfile().getName();
+        String senderName = senderPlayer.getGameProfile().name();
         new ChatConfirmationPrompt(
             targetPlayer,
             "/tpaccept " + senderName,

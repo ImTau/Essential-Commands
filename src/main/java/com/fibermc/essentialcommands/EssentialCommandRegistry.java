@@ -480,7 +480,7 @@ public final class EssentialCommandRegistry {
                                 return;
                             }
                             context.getSource().sendFeedback(() ->
-                                Text.of(playerEntity.getPos().toString()),
+                                Text.of(playerEntity.getEntityPos().toString()),
                                 EssentialCommands.CONFIG.BROADCAST_TO_OPS);
                         });
                     return 1;

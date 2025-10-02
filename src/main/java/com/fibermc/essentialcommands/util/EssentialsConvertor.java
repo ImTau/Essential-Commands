@@ -18,6 +18,7 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 
 import net.minecraft.network.packet.c2s.common.SyncedClientOptions;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.PlayerConfigEntry;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.world.World;
@@ -58,6 +59,7 @@ public final class EssentialsConvertor {
     //  are some good ideas here that might be worth carrying over
     @SuppressWarnings("UnreachableCode") // for some reason IDEA 2024.1 hates casting and grays out everything after (L94)
     public static void homeConvert(MinecraftServer server) {
+        var nameToIdCache = server.getApiServices().nameToIdCache();
         File oldUsersDataDictionary = OLD_USERDATA_PATH.toFile();
         if (!oldUsersDataDictionary.exists() || oldUsersDataDictionary.isFile()) {
             oldUsersDataDictionary.mkdirs();
@@ -82,7 +84,7 @@ public final class EssentialsConvertor {
 
                         if (data.containsKey("homes")) {
                             String playerName = (String) data.get("last-account-name");
-                            Optional<GameProfile> playerCache = server.getUserCache().findByName(playerName);
+                            Optional<PlayerConfigEntry> playerCache = nameToIdCache.findByName(playerName);
 
                             GameProfile playerProfile = new GameProfile(UUID.fromString(oldUserDataFile.getName().replaceAll(".yml", "").replaceAll(".yaml", "")), playerName);
 

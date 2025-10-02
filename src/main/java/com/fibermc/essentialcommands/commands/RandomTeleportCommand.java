@@ -94,7 +94,7 @@ public class RandomTeleportCommand implements Command<ServerCommandSource> {
         }
 
         threadExecutor.execute(() -> {
-            EssentialCommands.LOGGER.info("Starting RTP location search for {}", player.getGameProfile().getName());
+            EssentialCommands.LOGGER.info("Starting RTP location search for {}", player.getGameProfile().name());
 
             Stopwatch timer = Stopwatch.createStarted();
 

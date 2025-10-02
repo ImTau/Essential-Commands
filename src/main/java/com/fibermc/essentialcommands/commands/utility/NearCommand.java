@@ -47,12 +47,12 @@ public class NearCommand implements Command<ServerCommandSource> {
     }
 
     public static int exec(PlayerData senderPlayerData, ServerPlayerEntity targetPlayer, int range) {
-        Vec3d basePos = targetPlayer.getPos();
+        Vec3d basePos = targetPlayer.getEntityPos();
 
-        List<Text> players = targetPlayer.getWorld().getPlayers().stream()
+        List<Text> players = targetPlayer.getEntityWorld().getPlayers().stream()
             .filter(player ->
                 targetPlayer.getUuid() != player.getUuid()
-                && basePos.isInRange(player.getPos(), range)
+                && basePos.isInRange(player.getEntityPos(), range)
                 && (!EssentialCommands.VANISH_PRESENT || VanishAPI.canSeePlayer((ServerPlayerEntity) player, senderPlayerData.getPlayer()))
             )
             .map(PlayerEntity::getDisplayName)

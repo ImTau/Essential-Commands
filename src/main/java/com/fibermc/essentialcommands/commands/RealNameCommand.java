@@ -38,7 +38,7 @@ public class RealNameCommand implements Command<ServerCommandSource> {
 
             for (PlayerData nicknamePlayer : nicknamePlayers) {
                 responseText.append("\n  ");
-                responseText.append(nicknamePlayer.getPlayer().getGameProfile().getName());
+                responseText.append(nicknamePlayer.getPlayer().getGameProfile().name());
             }
         }
 

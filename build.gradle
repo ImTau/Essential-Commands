@@ -79,7 +79,7 @@ allprojects {
     repositories {
         gradlePluginPortal()
         mavenCentral()
-        mavenLocal()
+//        mavenLocal()
         maven { name 'Fabric'; url 'https://maven.fabricmc.net/' }
 //        maven { name 'TerraformersMC'; url 'https://maven.terraformersmc.com/' }
         // Add repositories to retrieve artifacts from in here.
@@ -93,7 +93,15 @@ allprojects {
             url = 'https://maven.ladysnake.org/releases'
             content {
                 includeGroup 'io.github.ladysnake'
-                includeGroupByRegex 'io\\.github\\.onyxstudios.*'
+                includeGroupByRegex 'org\\.ladysnake.*'
+            }
+        }
+        maven {
+            name = 'jpcode'
+            url = 'https://maven.jpcode.dev/'
+            content {
+                includeGroup 'io.github.ladysnake'
+                includeGroupByRegex 'org\\.ladysnake.*'
             }
         }
         maven { url "https://api.modrinth.com/maven" } // for vanish

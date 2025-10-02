@@ -37,7 +37,7 @@ public final class PlayerProfileFactory {
             }
         } else {
             pData.markDirty();
-            pData.save(Objects.requireNonNull(player.getServer()).getRegistryManager());
+            pData.save(Objects.requireNonNull(player.getEntityWorld().getServer()).getRegistryManager());
         }
 
         return pData;
@@ -57,7 +57,7 @@ public final class PlayerProfileFactory {
     }
 
     private static File getPlayerProfileFile(ServerPlayerEntity player) throws IOException {
-        return FileUtil.getOrCreateWorldDirectory(player.getServer(), "ec_player_profiles")
+        return FileUtil.getOrCreateWorldDirectory(player.getEntityWorld().getServer(), "ec_player_profiles")
             .resolve(player.getUuidAsString() + ".dat")
             .toFile();
     }

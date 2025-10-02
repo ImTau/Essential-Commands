@@ -147,8 +147,8 @@ public class PlayerData extends PersistentState implements IServerPlayerEntityDa
     public void initializeRuntimeState(ServerPlayerEntity player, File saveFile) {
         initializeSaveFileField(saveFile);
         this.player = player;
-        this.lastTickPos = player.getPos();
-        this.lastActionTick = player.getServer().getTicks();
+        this.lastTickPos = player.getEntityPos();
+        this.lastActionTick = player.getEntityWorld().getServer().getTicks();
         this.pUuid = player.getUuid();
 
         // Re-register events
@@ -305,7 +305,7 @@ public class PlayerData extends PersistentState implements IServerPlayerEntityDa
             }
 
             if (!EssentialCommands.VANISH_PRESENT || !VanishAPI.isVanished(player)) {
-                this.player.getServer().getPlayerManager().broadcast(
+                this.player.getEntityWorld().getServer().getPlayerManager().broadcast(
                     ECText.getInstance().getText(
                         "player.afk.enter",
                         this.player.getDisplayName()),
@@ -323,7 +323,7 @@ public class PlayerData extends PersistentState implements IServerPlayerEntityDa
             Pal.revokeAbility(this.player, VanillaAbilities.INVULNERABLE, ECAbilitySources.AFK_INVULN);
 
             if (!EssentialCommands.VANISH_PRESENT || !VanishAPI.isVanished(player)) {
-                this.player.getServer().getPlayerManager().broadcast(
+                this.player.getEntityWorld().getServer().getPlayerManager().broadcast(
                     ECText.getInstance().getText(
                         "player.afk.exit",
                         this.player.getDisplayName()),
@@ -339,8 +339,8 @@ public class PlayerData extends PersistentState implements IServerPlayerEntityDa
     }
 
     public void onTickEnd() {
-        var ticks = player.getServer().getTicks();
-        var currentPos = player.getPos();
+        var ticks = player.getEntityWorld().getServer().getTicks();
+        var currentPos = player.getEntityPos();
         hasMovedThisTick = !this.lastTickPos.equals(currentPos);
         if (hasMovedThisTick) {
             lastMovedTick = ticks;
@@ -360,7 +360,7 @@ public class PlayerData extends PersistentState implements IServerPlayerEntityDa
             this.setAfk(true);
         }
 
-        lastTickPos = player.getPos();
+        lastTickPos = player.getEntityPos();
     }
 
     public Vec3d getLastTickPos() {
@@ -380,7 +380,7 @@ public class PlayerData extends PersistentState implements IServerPlayerEntityDa
     }
 
     public double distanceMovedThisTick() {
-        return this.lastTickPos.distanceTo(this.player.getPos());
+        return this.lastTickPos.distanceTo(this.player.getEntityPos());
     }
 
     public int getLastActionTick() {
@@ -388,11 +388,11 @@ public class PlayerData extends PersistentState implements IServerPlayerEntityDa
     }
 
     public int ticksSinceLastActionOrMove() {
-        return player.getServer().getTicks() - Math.max(lastMovedTick, lastActionTick);
+        return player.getEntityWorld().getServer().getTicks() - Math.max(lastMovedTick, lastActionTick);
     }
 
     public void updateLastActionTick() {
-        this.lastActionTick = player.getServer().getTicks();
+        this.lastActionTick = player.getEntityWorld().getServer().getTicks();
     }
 
     public boolean isSleepingFromCommand() {
@@ -507,7 +507,7 @@ public class PlayerData extends PersistentState implements IServerPlayerEntityDa
             resultCode = 1;
             EssentialCommands.LOGGER.info(
                 "Cleared {}'s nickname",
-                this.player.getGameProfile().getName()
+                this.player.getGameProfile().name()
             );
         } else {
             // Ensure nickname does not exceed max length
@@ -519,14 +519,14 @@ public class PlayerData extends PersistentState implements IServerPlayerEntityDa
             if (!hasRequiredPerms) {
                 EssentialCommands.LOGGER.info(
                     "{} attempted to set nickname to '{}', with insufficient permissions to do so.",
-                    this.player.getGameProfile().getName(),
+                    this.player.getGameProfile().name(),
                     nickname
                 );
                 return -1;
             } else {
                 EssentialCommands.LOGGER.info(
                     "Set {}'s nickname to '{}'.",
-                    this.player.getGameProfile().getName(),
+                    this.player.getGameProfile().name(),
                     nickname
                 );
             }
@@ -564,7 +564,7 @@ public class PlayerData extends PersistentState implements IServerPlayerEntityDa
     }
 
     private void reloadFullNickname() {
-        MutableText baseName = Text.literal(this.getPlayer().getGameProfile().getName());
+        MutableText baseName = Text.literal(this.getPlayer().getGameProfile().name());
         MutableText tempFullNickname = Text.empty();
         // Note: this doesn't ever display if nickname is null,
         //  because our mixin to getDisplayName does a null check on getNickname

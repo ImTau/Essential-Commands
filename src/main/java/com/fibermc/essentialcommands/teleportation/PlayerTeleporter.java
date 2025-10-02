@@ -42,7 +42,7 @@ public final class PlayerTeleporter {
 
     public static void requestTeleport(QueuedTeleport queuedTeleport) {
         ServerPlayerEntity player = queuedTeleport.getPlayerData().getPlayer();
-//        if (pData.getTpCooldown() < 0 || player.getServer().getPlayerManager().isOperator(player.getGameProfile())) {
+//        if (pData.getTpCooldown() < 0 || player.getEntityWorld().getServer().getPlayerManager().isOperator(player.getGameProfile())) {
 //            //send TP request to tpManager
 //        }
         if (playerHasTpRulesBypass(player, ECPerms.Registry.bypass_teleport_delay) || CONFIG.TELEPORT_DELAY_TICKS <= 0) {
@@ -68,7 +68,7 @@ public final class PlayerTeleporter {
         if (!CONFIG.ALLOW_TELEPORT_BETWEEN_DIMENSIONS
             && !playerHasTpRulesBypass(player, ECPerms.Registry.bypass_allow_teleport_between_dimensions)) {
             // If this teleport is between dimensions
-            if (dest.dim() != player.getWorld().getRegistryKey()) {
+            if (dest.dim() != player.getEntityWorld().getRegistryKey()) {
                 pData.sendError("teleport.error.interdimensional_teleport_disabled");
                 return;
             }
@@ -85,7 +85,7 @@ public final class PlayerTeleporter {
      * @param destName the name of the destination to be displayed in messages
      */
     private static void execTeleport(ServerPlayerEntity playerEntity, MinecraftLocation dest, MutableText destName) {
-        var playerServer = playerEntity.getServer();
+        var playerServer = playerEntity.getEntityWorld().getServer();
         var targetWorld = playerServer.getWorld(dest.dim());
 
         if (targetWorld == null) {
@@ -114,7 +114,7 @@ public final class PlayerTeleporter {
      */
     private static List<TameableEntity> detectTamedPets(ServerPlayerEntity playerEntity, BlockPos playerPos) {
         double radius = Math.max(CONFIG.TELEPORT_FOLLOWERS_RADIUS, 0);
-        ServerWorld playerWorld = (ServerWorld) playerEntity.getWorld();
+        ServerWorld playerWorld = (ServerWorld) playerEntity.getEntityWorld();
 
         return playerWorld.getEntitiesByClass(TameableEntity.class, new Box(playerPos).expand(radius), pet -> {
             boolean isTamed = pet.isTamed();
@@ -141,7 +141,7 @@ public final class PlayerTeleporter {
      */
     private static void teleportTamedEntities(List<TameableEntity> pets, ServerWorld targetWorld, Vec3d targetVec, ServerPlayerEntity playerEntity) {
         for (TameableEntity pet : pets) {
-            if (pet.getWorld() != targetWorld) {
+            if (pet.getEntityWorld() != targetWorld) {
                 if (!transferEntityToWorld(pet, targetWorld, targetVec, playerEntity)) {
                     LOGGER.warn("Failed to transfer pet {} ({}) to {}", pet.getType().getTranslationKey(), pet.getUuid(), targetWorld.getRegistryKey().getValue());
                 }

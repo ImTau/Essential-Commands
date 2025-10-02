@@ -22,7 +22,7 @@ public class NicknameClearCommand implements Command<ServerCommandSource> {
         //inform command sender that the nickname has been set
         senderPlayerData.sendCommandFeedback(
             "cmd.nickname.set.feedback",
-            Text.literal(targetPlayer.getGameProfile().getName())
+            Text.literal(targetPlayer.getGameProfile().name())
         );
 
         return SINGLE_SUCCESS;

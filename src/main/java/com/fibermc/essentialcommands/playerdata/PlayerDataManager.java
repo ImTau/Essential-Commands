@@ -265,7 +265,7 @@ public class PlayerDataManager {
                 private boolean isSameWorld() {
                     return (
                         oldPlayerEntity == null ||
-                        oldPlayerEntity.getWorld().getRegistryKey() ==
+                        oldPlayerEntity.getEntityWorld().getRegistryKey() ==
                         spawnLoc.dim()
                     );
                 }

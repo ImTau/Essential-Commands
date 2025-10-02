@@ -61,7 +61,7 @@ public class NicknameSetCommand implements Command<ServerCommandSource> {
         if (successCode >= 0) {
             senderFeedbackReceiver.sendCommandFeedback(
                 "cmd.nickname.set.feedback",
-                nicknameText != null ? nicknameText : Text.literal(targetPlayer.getGameProfile().getName())
+                nicknameText != null ? nicknameText : Text.literal(targetPlayer.getGameProfile().name())
             );
         } else {
             MutableText failReason = switch (successCode) {

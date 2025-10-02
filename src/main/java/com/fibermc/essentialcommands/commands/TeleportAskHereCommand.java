@@ -46,7 +46,7 @@ public class TeleportAskHereCommand implements Command<ServerCommandSource> {
             targetPlayerEcText.accent(senderPlayer.getNameForScoreboard())
         );
 
-        String senderName = senderPlayer.getGameProfile().getName();
+        String senderName = senderPlayer.getGameProfile().name();
         new ChatConfirmationPrompt(
             targetPlayer,
             "/tpaccept " + senderName,

@@ -1,21 +1,23 @@
 package com.fibermc.essentialcommands.commands.suggestions;
 
 import java.util.HashMap;
+import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import com.mojang.authlib.GameProfile;
-import com.mojang.authlib.ProfileLookupCallback;
+import com.mojang.authlib.yggdrasil.response.NameAndId;
 
 import net.minecraft.network.packet.c2s.common.SyncedClientOptions;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.PlayerConfigEntry;
 import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.util.ErrorReporter;
 
 public class OfflinePlayerRepo {
 
-    private final HashMap<String, GameProfile> gameProfileCache = new HashMap<>();
+    private final HashMap<String, NameAndId> gameProfileCache = new HashMap<>();
     private final MinecraftServer server;
-    private final ErrorReporter errorReporter = new ErrorReporter.Impl();
 
     public OfflinePlayerRepo(MinecraftServer server) {
         this.server = server;
@@ -23,52 +25,45 @@ public class OfflinePlayerRepo {
 
     public CompletableFuture<ServerPlayerEntity> getOfflinePlayerByNameAsync(String playerName) {
         return getGameProfile(playerName)
-            .handle(((gameProfile, throwable) -> gameProfile == null
-                ? null
-                : getOfflinePlayer(gameProfile)));
+            .handle(((gameProfile, throwable) -> gameProfile.map(this::getOfflinePlayer).orElse(null)));
     }
 
-    public ServerPlayerEntity getOfflinePlayer(GameProfile playerProfile) {
+    public ServerPlayerEntity getOfflinePlayer(NameAndId playerProfile) {
         var player = new ServerPlayerEntity(
             server,
             server.getOverworld(),
-            playerProfile,
+            new GameProfile(playerProfile.id(), playerProfile.name()),
             SyncedClientOptions.createDefault());
 
-        server.getPlayerManager().loadPlayerData(player, errorReporter);
+        server.getPlayerManager().loadPlayerData(new PlayerConfigEntry(playerProfile.id(), playerProfile.name()));
 
         return player;
     }
 
-    public CompletableFuture<GameProfile> getGameProfile(String playerName) {
+    public CompletableFuture<Optional<NameAndId>> getGameProfile(String playerName) {
         var profile = gameProfileCache.get(playerName);
         if (profile != null) {
             CompletableFuture.completedFuture(profile);
         }
         return requestGameProfile(playerName)
             .whenComplete((gameProfile, err) -> {
-                if (gameProfile != null) {
-                    gameProfileCache.put(gameProfile.getName(), gameProfile);
-                }
+                gameProfile.ifPresent(nameAndId -> gameProfileCache.put(nameAndId.name(), nameAndId));
             });
     }
 
-    private CompletableFuture<GameProfile> requestGameProfile(String playerName) {
-        CompletableFuture<GameProfile> out = new CompletableFuture<>();
-        server.getGameProfileRepo().findProfilesByNames(
-            new String[]{playerName},
-            new ProfileLookupCallback() {
-                @Override
-                public void onProfileLookupSucceeded(GameProfile profile) {
-                    System.out.println(profile.toString());
-                    out.complete(profile);
-                }
+    private final ExecutorService gameProfileExecutor = Executors.newVirtualThreadPerTaskExecutor();
 
-                @Override
-                public void onProfileLookupFailed(String profileName, Exception exception) {
-                    out.complete(null);
-                }
-            });
-        return out;
+    private CompletableFuture<Optional<NameAndId>> requestGameProfile(String playerName) {
+        CompletableFuture<Optional<NameAndId>> completable = new CompletableFuture<>();
+
+        gameProfileExecutor.execute(() -> {
+            try {
+                completable.complete(server.getApiServices().profileRepository().findProfileByName(playerName));
+            } catch (Exception ex) {
+                completable.completeExceptionally(ex);
+            }
+        });
+
+        return completable;
     }
 }

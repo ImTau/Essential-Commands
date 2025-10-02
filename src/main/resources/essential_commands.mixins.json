@@ -8,6 +8,7 @@
     "PlayerEntityMixin",
     "PlayerListS2CPacketActionMixin",
     "PlayerManagerMixin",
+    "PrepareSpawnTaskMixin",
     "ServerPlayerEntityMixin",
     "ServerPlayNetworkHandlerMixin",
     "ServerScoreboardMixin",

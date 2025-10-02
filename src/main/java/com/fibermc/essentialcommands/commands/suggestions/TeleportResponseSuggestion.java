@@ -16,7 +16,7 @@ public final class TeleportResponseSuggestion {
     public static final SuggestionProvider<ServerCommandSource> STRING_SUGGESTIONS_PROVIDER
         = ListSuggestion.ofContext((CommandContext<ServerCommandSource> context) ->
         ((ServerPlayerEntityAccess) context.getSource().getPlayer()).ec$getPlayerData().getIncomingTeleportRequests().values()
-            .stream().map((entry) -> entry.getSenderPlayer().getGameProfile().getName())
+            .stream().map((entry) -> entry.getSenderPlayer().getGameProfile().name())
             .collect(Collectors.toList())
     );
 }

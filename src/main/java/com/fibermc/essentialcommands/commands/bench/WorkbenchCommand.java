@@ -14,7 +14,7 @@ public class WorkbenchCommand extends SimpleScreenCommand {
         new CraftingCommandScreenHandler(
             syncId,
             inventory,
-            ScreenHandlerContext.create(player.getWorld(), player.getBlockPos())
+            ScreenHandlerContext.create(player.getEntityWorld(), player.getBlockPos())
         );
 
     @Override
