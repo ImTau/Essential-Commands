@@ -2,6 +2,8 @@
 
 - upgrade to Minecraft 1.21.9
 
+--- --- ---
+
 ## Essential Commands `v0.38.5` (mc 1.21.8)
 
 - assorted internal dependency and tooling upgrades
