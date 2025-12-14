@@ -128,6 +128,13 @@ public final class EssentialCommandRegistry {
             LiteralArgumentBuilder<CommandSourceStack> homeListOfflineBuilder = Commands.literal("list_offline");
             LiteralArgumentBuilder<CommandSourceStack> homeOverwriteBuilder = Commands.literal("overwritehome");
 
+            homeBuilder
+                .requires(ECPerms.require(ECPerms.Registry.home_tp, 0))
+                .executes(new HomeCommand()::runDefault)
+                .then(argument("home_name", StringArgumentType.word())
+                    .suggests(HomeCommand.Suggestion.LIST_SUGGESTION_PROVIDER)
+                    .executes(new HomeCommand()));
+
             homeSetBuilder
                 .requires(ECPerms.require(ECPerms.Registry.home_set, 0))
                 .executes(new HomeSetCommand()::runDefault)
@@ -214,6 +221,12 @@ public final class EssentialCommandRegistry {
             LiteralArgumentBuilder<CommandSourceStack> warpTpOtherBuilder = Commands.literal("tp_other");
             LiteralArgumentBuilder<CommandSourceStack> warpDeleteBuilder = Commands.literal("delete");
             LiteralArgumentBuilder<CommandSourceStack> warpListBuilder = Commands.literal("list");
+
+            warpBuilder
+                .requires(ECPerms.require(ECPerms.Registry.warp_tp, 0))
+                .then(argument("warp_name", StringArgumentType.word())
+                    .suggests(WarpSuggestion.STRING_SUGGESTIONS_PROVIDER)
+                    .executes(new WarpTpCommand()));
 
             warpSetBuilder
                 .requires(ECPerms.require(ECPerms.Registry.warp_set, 4))
