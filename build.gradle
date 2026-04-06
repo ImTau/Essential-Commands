@@ -1,8 +1,7 @@
 plugins {
     id 'groovy'
-    id 'fabric-loom' version "${loom_version}"
-    id 'maven-publish'
-    id "com.hypherionmc.modutils.modpublisher" version "2.1.6"
+    id 'net.fabricmc.fabric-loom' version "${loom_version}" apply false
+    id "com.hypherionmc.modutils.modpublisher" version "2.2.1"
 }
 
 build {
@@ -15,12 +14,13 @@ String getenv(String key) {
     return ext.env.getOrDefault(key, "NOT FOUND")
 }
 
-tasks.named('remapJar').configure {
+tasks.named('jar').configure {
     dependsOn(tasks.named('compileTestGroovy'))
 }
 
 allprojects {
-    apply plugin: 'fabric-loom'
+    apply plugin: 'net.fabricmc.fabric-loom'
+    apply plugin: 'maven-publish'
     apply plugin: 'idea'
 
     group = project.maven_group
@@ -32,61 +32,13 @@ allprojects {
     version = full_version
     base.archivesName = "${project.mod_id}"
     println "version: $full_version"
-    println "base.archivesName: $base.archivesName"
-
-    // Common dependencies for all projects
-    dependencies {
-        // Fabric
-        minecraft "com.mojang:minecraft:${project.minecraft_version}"
-        mappings loom.officialMojangMappings()
-        modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
-
-        // Code Quality
-        compileOnly "org.jetbrains:annotations:${project.jetbrains_annotations_version}"
-        testImplementation platform("org.junit:junit-bom:${project.junit_bom_version}")
-        testImplementation 'org.junit.jupiter:junit-jupiter'
-        testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
-        testImplementation "net.fabricmc:fabric-loader-junit:${project.loader_version}"
-
-        subprojects.each {
-            implementation project(path: ":${it.name}", configuration: "namedElements")
-            include project("${it.name}:")
-        }
-    }
-
-    test {
-        useJUnitPlatform()
-    }
-
-    java {
-        withSourcesJar()
-    }
-
-    tasks.withType(Jar).configureEach {
-        it.from rootProject.file('LICENCE')
-    }
-
-    processResources {
-        inputs.property 'id', project.mod_id
-        inputs.property 'name', project.mod_name
-        inputs.property 'version', project.version
-
-        filesMatching('fabric.mod.json') {
-            expand(['id': project.mod_id, 'name': project.mod_name, 'version': project.version])
-        }
-    }
+    println "base.archivesName: ${base.archivesName.get()}"
 
     repositories {
         gradlePluginPortal()
         mavenCentral()
 //        mavenLocal()
         maven { name 'Fabric'; url 'https://maven.fabricmc.net/' }
-//        maven { name 'TerraformersMC'; url 'https://maven.terraformersmc.com/' }
-        // Add repositories to retrieve artifacts from in here.
-        // You should only use this when depending on other mods because
-        // Loom adds the essential maven repositories to download Minecraft and libraries from automatically.
-        // See https://docs.gradle.org/current/userguide/declaring_repositories.html
-        // for more information about repositories.
         maven { url 'https://maven.nucleoid.xyz' } // Used by FabricPlaceholderAPI
         maven {
             name = 'Ladysnake Mods'
@@ -106,66 +58,119 @@ allprojects {
         }
         maven { url "https://api.modrinth.com/maven" } // for vanish
     }
+
+    loom {
+        splitEnvironmentSourceSets()
+
+        mods {
+            "${project.mod_id}" {
+                sourceSet sourceSets.main
+            }
+        }
+    }
+
+    // Common dependencies for all projects
+    dependencies {
+        // Fabric
+        minecraft "com.mojang:minecraft:${project.minecraft_version}"
+        implementation "net.fabricmc:fabric-loader:${project.loader_version}"
+        implementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_api_version}"
+        implementation "eu.pb4:placeholder-api:${project.placeholder_api_version}"
+
+        // Code Quality
+        compileOnly "org.jetbrains:annotations:${project.jetbrains_annotations_version}"
+        testImplementation platform("org.junit:junit-bom:${project.junit_bom_version}")
+        testImplementation 'org.junit.jupiter:junit-jupiter'
+        testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+        testImplementation "net.fabricmc:fabric-loader-junit:${project.loader_version}"
+    }
+
+    processResources {
+        inputs.property 'id', project.mod_id
+        inputs.property 'name', project.mod_name
+        inputs.property 'version', project.version
+
+        filesMatching('fabric.mod.json') {
+            expand([
+                'id': project.mod_id,
+                'name': project.mod_name,
+                'version': project.version
+            ])
+        }
+    }
+
+    tasks.withType(JavaCompile).configureEach {
+        // ensure that the encoding is set to UTF-8, no matter what the system default is
+        // this fixes some edge cases with special characters not displaying correctly
+        // see http://yodaconditions.net/blog/fix-for-java-file-encoding-problems-with-gradle.html
+        // If Javadoc is generated, this must be specified in that task too.
+        it.options.encoding = "UTF-8"
+        // java version
+        it.options.release.set(25)
+    }
+
+    test {
+        useJUnitPlatform()
+    }
+
+    java {
+        withSourcesJar()
+
+        sourceCompatibility = JavaVersion.VERSION_25
+        targetCompatibility = JavaVersion.VERSION_25
+    }
+
+    jar {
+        inputs.property "archivesName", project.base.archivesName
+
+        from("LICENSE") {
+            rename { "${it}_${inputs.properties.archivesName}"}
+        }
+    }
+
+    publishing {
+        publications {
+            create("mavenJava", MavenPublication) {
+                artifactId = project.mod_id
+                groupId = project.maven_group
+                version = project.version
+                from components.java
+            }
+        }
+        // Add repositories to publish to
+        repositories {
+            mavenLocal { }
+            maven {
+                name 'GitHub'
+                url "https://maven.pkg.github.com/${project.gh_owner}/${project.gh_repo}"
+                credentials {
+                    username = getenv('GITHUB_ACTOR')
+                    password = getenv('GITHUB_TOKEN')
+                }
+            }
+        }
+    }
 }
 
 // Root-project-specific dependencies
 dependencies {
-    modImplementation "me.lucko:fabric-permissions-api:${project.permissions_api_version}"
-
-    // included in fabriclocader 1.15+, kept here for compat on older loaders, I think
-    include(implementation(annotationProcessor("io.github.llamalad7:mixinextras-fabric:${project.mixinextras_version}")))
+    implementation "me.lucko:fabric-permissions-api:${project.permissions_api_version}"
 
     // JIJ Dependencies (include for packaging)
-    modApi  "me.lucko:fabric-permissions-api:${project.permissions_api_version}"
+    implementation "me.lucko:fabric-permissions-api:${project.permissions_api_version}"
     include "me.lucko:fabric-permissions-api:${project.permissions_api_version}"
     include "eu.pb4:placeholder-api:${project.placeholder_api_version}"
-    modImplementation "org.yaml:snakeyaml:${project.snakeyaml_version}"
+    implementation "org.yaml:snakeyaml:${project.snakeyaml_version}"
     include "org.yaml:snakeyaml:${project.snakeyaml_version}"
-    modImplementation "io.github.ladysnake:PlayerAbilityLib:${pal_version}"
+    implementation "io.github.ladysnake:PlayerAbilityLib:${pal_version}"
     include "io.github.ladysnake:PlayerAbilityLib:${pal_version}"
 
     // mod compatibility
-    modCompileOnly  "maven.modrinth:vanish:${project.vanish_version}"
+    compileOnly  "maven.modrinth:vanish:${project.vanish_version}"
 
     subprojects.each {
-        implementation project(path: ":${it.name}", configuration: "namedElements")
+        implementation project(path: ":${it.name}")
         include project("${it.name}:")
-    }
-}
-
-tasks.withType(JavaCompile).configureEach {
-    // ensure that the encoding is set to UTF-8, no matter what the system default is
-    // this fixes some edge cases with special characters not displaying correctly
-    // see http://yodaconditions.net/blog/fix-for-java-file-encoding-problems-with-gradle.html
-    // If Javadoc is generated, this must be specified in that task too.
-    it.options.encoding = "UTF-8"
-    // java version
-    it.options.release.set(21)
-}
-
-publishing {
-    publications {
-        mavenJava(MavenPublication) {
-            artifactId = project.mod_id
-            groupId = project.maven_group
-            version = project.version
-            artifact(remapJar) { builtBy remapJar }
-            artifact(sourcesJar) {
-                builtBy remapSourcesJar
-            }
-        }
-    }
-    // Add repositories to publish to
-    repositories {
-        mavenLocal { }
-        maven {
-            name 'GitHub'
-            url "https://maven.pkg.github.com/${project.gh_owner}/${project.gh_repo}"
-            credentials {
-                username = getenv('GITHUB_ACTOR')
-                password = getenv('GITHUB_TOKEN')
-            }
-        }
     }
 }
 
@@ -195,12 +200,12 @@ publisher {
     setLoaders("fabric")
     setCurseEnvironment("both")
 
-    setArtifact(remapJar)
-    setJavaVersions([JavaVersion.VERSION_21])
+    setArtifact(jar)
+    setJavaVersions([JavaVersion.VERSION_25])
 
     // Add subproject artifacts as additional files
     subprojects.each { subproject ->
-        addAdditionalFile(subproject.remapJar)
+        addAdditionalFile(subproject.jar)
     }
 
     github {
