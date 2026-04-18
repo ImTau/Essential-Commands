@@ -121,6 +121,9 @@ Teleport to a random location in the world.
 - `rtp_cooldown` - Cooldown between random teleports (seconds) - Default: `30`
 - `rtp_max_attempts` - Maximum tries to find valid location - Default: `15`
 - `rtp_enabled_worlds` - Worlds where RTP is enabled - Default: `overworld`
+  - valid values are the registry keys of worlds that exist on your server. In vanilla, that's: `minecraft:overworld`, `minecraft:the_nether`, `minecraft:the_end`
+  - any number of entries may be provided, separated by commas, e.g. `overworld,the_nether,the_end`
+  - milelage may vary in The End, as the RTP algorithm currently struggles to quickly find safe locations in void-heavy worlds
 
 #### Bed Command
 Teleport to your bed or spawnpoint.
@@ -324,7 +327,7 @@ This admin command allows tracking a player's most recent position, even if they
 
 | Feature | Commands | Permissions |
 |---------|----------|------------|
-| Get player's last position | `/lastpos <player>` | `essentialcommands.admin.lasPos` |
+| Get player's last position | `/lastpos <player>` | `essentialcommands.admin.lastPos` |
 
 ### Clear Player Data
 This command is extremely powerful and should be restricted to server administrators only. It completely erases all data about all players stored by Essential Commands.
