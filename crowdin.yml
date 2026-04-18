@@ -1,0 +1,7 @@
+project_id: "essential-commands"
+api_token_env: CROWDIN_PERSONAL_TOKEN
+
+files:
+  - source: /src/main/resources/data/essential_commands/lang/en_us.json
+    translation: /src/main/resources/data/essential_commands/lang/%locale_with_underscore%.json
+
