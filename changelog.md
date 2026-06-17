@@ -1,3 +1,14 @@
+## Essential Commands `v0.40.0-beta1` (mc 26.2.0 snapshot 2)
+
+- upgrade to Minecraft 26.2.0 (snapshot 2) (#391) by @eclipseisoffline
+- fix server placeholders (#388) by @arnokeesman 
+- resolve unexpected CR box characters in /rules output (#388) by @tiehu
+- fix permissions system not handling "Permissions Only, not OP" correctly (#380)
+- migrate to Server Translations for langfiles (#384)
+- fix server placeholders in MOTD by @arnokeesman
+
+--- --- ---
+
 ## Essential Commands `v0.39.0` (mc 26.1.1)
 
 Note well that Minecraft has a new versioning scheme. This version of Essential
