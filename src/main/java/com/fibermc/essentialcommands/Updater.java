@@ -1,59 +1,111 @@
 package com.fibermc.essentialcommands;
 
+import com.google.gson.JsonArray;
+import com.google.gson.JsonParser;
 import java.net.URI;
+import java.net.URLEncoder;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.nio.charset.StandardCharsets;
 import java.time.Duration;
-
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
+import net.fabricmc.loader.api.FabricLoader;
 import net.fabricmc.loader.api.Version;
 import net.fabricmc.loader.api.VersionParsingException;
 import net.fabricmc.loader.api.metadata.ModMetadata;
 
 public final class Updater {
+
     private Updater() {}
 
+    private static final String MODRINTH_SLUG = "essential-commands";
+
     public static void checkForUpdates() {
-        HttpClient client = HttpClient.newBuilder()
-            .connectTimeout(Duration.ofMillis(1500))
-            .build();
-        client.sendAsync(
-            HttpRequest.newBuilder()
-                .uri(URI.create("https://www.jpcode.dev/essentialcommands/latest_version"))
-                .version(HttpClient.Version.HTTP_2)
-                .GET()
-                .build(),
-            HttpResponse.BodyHandlers.ofString()
-        ).thenAcceptAsync((HttpResponse<String> response) -> {
-            String latestVersionStr = response.body();
+        HttpClient client = HttpClient.newBuilder().connectTimeout(Duration.ofMillis(1500)).build();
 
-            ModMetadata modMetadata = EssentialCommands.MOD_METADATA;
-            if (modMetadata == null) {
-                EssentialCommands.LOGGER.warn("Failed to check for Essential Commands updates.");
-                return;
-            }
+        ModMetadata modMetadata = EssentialCommands.MOD_METADATA;
+        if (modMetadata == null) {
+            EssentialCommands.LOGGER.warn("Failed to check for Essential Commands updates.");
+            return;
+        }
 
-            String currentVersionStr = modMetadata.getVersion().getFriendlyString();
-            try {
-                Version currentVers = Version.parse(stripMinecraftVersion(currentVersionStr));//VersionDeserializer.deserializeSemantic(stripMinecraftVersion.apply(currentVersionStr));
-                Version latestVers = Version.parse(stripMinecraftVersion(latestVersionStr));
-                if (latestVers.compareTo(currentVers) > 0) {
-                    String updateMessage = String.format(
+        // The MC version the server/client is currently running, e.g. "26.1" or "1.21.6".
+        String mcVersion = FabricLoader.getInstance()
+            .getModContainer("minecraft")
+            .map(c -> c.getMetadata().getVersion().getFriendlyString())
+            .orElse(null);
+        if (mcVersion == null) {
+            EssentialCommands.LOGGER.warn("Could not determine Minecraft version; skipping update check.");
+            return;
+        }
+
+        // game_versions and loaders are JSON-array query params, so they must be URL-encoded.
+        String gameVersionsParam = encode("[\"%s\"]".formatted(mcVersion));
+        String loadersParam = encode("[\"fabric\"]");
+        String uri = "https://api.modrinth.com/v2/project/%s/version?game_versions=%s&loaders=%s".formatted(
+            MODRINTH_SLUG,
+            gameVersionsParam,
+            loadersParam
+        );
+
+        client
+            .sendAsync(
+                HttpRequest.newBuilder()
+                    .uri(URI.create(uri))
+                    .version(HttpClient.Version.HTTP_2)
+                    .header(
+                        "User-Agent",
+                        "jpcode.dev/essential-commands/%s".formatted(modMetadata.getVersion().getFriendlyString())
+                    )
+                    .GET()
+                    .build(),
+                HttpResponse.BodyHandlers.ofString()
+            )
+            .thenAcceptAsync((HttpResponse<String> response) -> {
+                if (response.statusCode() != 200) {
+                    EssentialCommands.LOGGER.warn(
+                        "Update check failed: Modrinth returned status {}.",
+                        response.statusCode()
+                    );
+                    return;
+                }
+
+                // Response is an array of version objects, ordered newest-first by date_published.
+                JsonArray versions = JsonParser.parseString(response.body()).getAsJsonArray();
+                if (versions.isEmpty()) {
+                    EssentialCommands.LOGGER.info("No Essential Commands release found for Minecraft {}.", mcVersion);
+                    return;
+                }
+
+                String latestVersionStr = versions.get(0).getAsJsonObject().get("version_number").getAsString();
+                String currentVersionStr = modMetadata.getVersion().getFriendlyString();
+
+                try {
+                    Version currentVers = Version.parse(stripMinecraftVersion(currentVersionStr));
+                    Version latestVers = Version.parse(stripMinecraftVersion(latestVersionStr));
+                    if (latestVers.compareTo(currentVers) > 0) {
+                        String updateMessage = String.format(
                             "A new version of Essential Commands is available. Current: '%s' Latest: '%s'. Get the new version at %s",
                             currentVersionStr,
                             latestVersionStr,
                             "https://modrinth.com/mod/essential-commands"
                         );
-                    EssentialCommands.LOGGER.info(updateMessage);
-                    ServerLifecycleEvents.SERVER_STARTED.register((server) -> EssentialCommands.LOGGER.info(updateMessage));
-                } else {
-                    EssentialCommands.LOGGER.info("Essential Commands is up to date!");
+                        EssentialCommands.LOGGER.info(updateMessage);
+                        ServerLifecycleEvents.SERVER_STARTED.register(server ->
+                            EssentialCommands.LOGGER.info(updateMessage)
+                        );
+                    } else {
+                        EssentialCommands.LOGGER.info("Essential Commands is up to date!");
+                    }
+                } catch (VersionParsingException e) {
+                    e.printStackTrace();
                 }
-            } catch (VersionParsingException e) {
-                e.printStackTrace();
-            }
-        });
+            });
+    }
+
+    private static String encode(String s) {
+        return URLEncoder.encode(s, StandardCharsets.UTF_8);
     }
 
     private static String stripMinecraftVersion(String versionStr) {
