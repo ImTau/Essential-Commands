@@ -3,10 +3,12 @@ package dev.jpcode.eccore.config;
 import java.time.Duration;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Locale;
 import java.util.stream.Collectors;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.Style;
+import net.minecraft.network.chat.TextColor;
 import net.minecraft.util.GsonHelper;
 import com.google.gson.JsonNull;
 import com.google.gson.JsonSyntaxException;
@@ -28,8 +30,8 @@ public final class ConfigUtil {
 
     private ConfigUtil() {}
 
-    // TODO do not delclair serializer objects out here. Pretty sure is bad for concurrent parsing.
-//    private static final Style.Serializer STYLE_JSON_DESERIALIZER = new Style.Serializer();
+    // TODO do not declare serializer objects out here. Pretty sure is bad for concurrent parsing.
+    //    private static final Style.Serializer STYLE_JSON_DESERIALIZER = new Style.Serializer();
 
     public static Style parseStyleOrDefault(String styleStr, String defaultStyleStr) {
         Style outStyle = null;
@@ -49,26 +51,27 @@ public final class ConfigUtil {
 
     @Nullable
     public static Style parseStyle(String styleStr) {
-        Style outStyle = null;
-        ChatFormatting formatting = ChatFormatting.getByName(styleStr);
-        if (formatting != null) {
-            outStyle = Style.EMPTY.applyFormat(formatting);
-        }
-
-        if (outStyle == null) {
-            try {
-                outStyle = Style.Serializer.CODEC.parse(
-                    JsonOps.INSTANCE,
-                    GsonHelper.parse(styleStr)
-                ).result().orElse(null);
-            } catch (JsonSyntaxException e) {
-                LOGGER.log(Level.ERROR, String.format(
-                    "Malformed Style JSON in config: %s", styleStr
-                ));
+        {
+            var simpleFormattingStyle = TextColor.parseColor(styleStr)
+                .result()
+                .map(Style.EMPTY::withColor);
+            if (simpleFormattingStyle.isPresent()) {
+                return simpleFormattingStyle.get();
             }
         }
 
-        return outStyle;
+        try {
+            var styleJson = GsonHelper.parse(styleStr);
+            return Style.Serializer.CODEC
+                .parse(JsonOps.INSTANCE, styleJson)
+                .result()
+                .orElse(null);
+        } catch (JsonSyntaxException e) {
+            LOGGER.log(Level.ERROR, String.format(
+                "Malformed Style JSON in config: %s", styleStr
+            ));
+            return null;
+        }
     }
 
     public static Component parseTextOrDefault(String textStr, String defaultTextStr) {
