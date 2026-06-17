@@ -5,9 +5,7 @@
 
   "name": "${name}",
   "description": "Various commands to improve your Minecraft experience! (tpa, home, back, warp)",
-  "authors": [
-    "John Paul R. (JP79194)"
-  ],
+  "authors": ["John Paul R. (JP79194)"],
   "contact": {
     "homepage": "https://www.jpcode.dev",
     "issues": "https://github.com/John-Paul-R/Essential-Commands/issues",
@@ -20,18 +18,13 @@
 
   "environment": "*",
   "entrypoints": {
-    "main": [
-      "com.fibermc.essentialcommands.EssentialCommands"
-    ]
+    "main": ["com.fibermc.essentialcommands.EssentialCommands"]
   },
-  "mixins": [
-    "essential_commands.mixins.json"
-  ],
+  "mixins": ["essential_commands.mixins.json"],
 
   "depends": {
     "fabricloader": ">=0.11.3",
-    "fabric-api": "*",
-    "fabric-permissions-api-v0": "*"
+    "fabric-api": "*"
   },
   "suggests": {
     "flamingo": "*"
