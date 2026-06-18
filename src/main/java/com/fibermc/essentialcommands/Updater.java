@@ -1,7 +1,9 @@
 package com.fibermc.essentialcommands;
 
-import com.google.gson.JsonArray;
-import com.google.gson.JsonParser;
+import com.google.gson.stream.JsonReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.net.URI;
 import java.net.URLEncoder;
 import java.net.http.HttpClient;
@@ -67,7 +69,7 @@ public final class Updater {
                     )
                     .GET()
                     .build(),
-                HttpResponse.BodyHandlers.ofString()
+                HttpResponse.BodyHandlers.ofInputStream()
             )
             .thenApply(response -> parseLatestVersionFromResponse(response, mcVersion))
             .thenAccept(latestVersionStr -> {
@@ -79,7 +81,7 @@ public final class Updater {
     }
 
     private static Optional<String> parseLatestVersionFromResponse(
-        HttpResponse<String> response,
+        HttpResponse<InputStream> response,
         String mcVersion
     ) {
         if (response.statusCode() != 200) {
@@ -90,15 +92,31 @@ public final class Updater {
             return Optional.empty();
         }
 
-        JsonArray versions = JsonParser.parseString(response.body()).getAsJsonArray();
-        if (versions.isEmpty()) {
-            EssentialCommands.LOGGER.info(
-                "No Essential Commands release found for Minecraft {}.",
-                mcVersion
-            );
-            return Optional.empty();
+        // Response body: [ { "version_number": "x.y.z-mcA.B", ... }, ... ], newest-first.
+        try (
+            JsonReader reader = new JsonReader(
+                new InputStreamReader(response.body(), StandardCharsets.UTF_8)
+            )
+        ) {
+            reader.beginArray();
+            if (!reader.hasNext()) {
+                EssentialCommands.LOGGER.info(
+                    "No Essential Commands release found for Minecraft {}.",
+                    mcVersion
+                );
+                return Optional.empty();
+            }
+            reader.beginObject();
+            while (reader.hasNext()) {
+                if (reader.nextName().equals("version_number")) {
+                    return Optional.of(reader.nextString());
+                }
+                reader.skipValue();
+            }
+        } catch (IOException e) {
+            EssentialCommands.LOGGER.warn("Failed to parse update check response.", e);
         }
-        return Optional.of(versions.get(0).getAsJsonObject().get("version_number").getAsString());
+        return Optional.empty();
     }
 
     private static void compareAndNotify(String currentVersionStr, String latestVersionStr) {
