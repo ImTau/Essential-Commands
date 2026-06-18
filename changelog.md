@@ -6,6 +6,7 @@
 - fix permissions system not handling "Permissions Only, not OP" correctly (#380)
 - migrate to Server Translations for langfiles (#384)
 - fix server placeholders in MOTD by @arnokeesman
+- use modrinth for update checking, enabling per-mc-version accuracy (#12)
 
 --- --- ---
 
