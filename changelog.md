@@ -1,3 +1,11 @@
+## Essential Commands `v0.41.0` (mc 26.2)
+
+- fix: default permissions under some conditions (#393) by @eclipseisoffline
+- fix: translations in list commands (#394) by @arnokeesman
+- lang: add Swedish localization (#395) by dotar
+
+---
+
 ## Essential Commands `v0.40.0-beta1` (mc 26.2.0 snapshot 2)
 
 - upgrade to Minecraft 26.2.0 (snapshot 2) (#391) by @eclipseisoffline
