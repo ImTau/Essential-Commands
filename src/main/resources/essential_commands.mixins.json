@@ -13,6 +13,7 @@
     "ServerGamePacketListenerImplMixin",
     "ServerScoreboardMixin",
     "SleepStatusMixin",
+    "EntitySelectorNicknameMixin",
     "TeleportCommandMixin",
     "PlayerDataStorageMixin"
   ],
