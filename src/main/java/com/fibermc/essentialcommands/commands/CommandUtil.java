@@ -7,8 +7,8 @@ import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import com.mojang.brigadier.tree.CommandNode;
-
 import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.commands.arguments.selector.EntitySelector;
 import net.minecraft.server.level.ServerPlayer;
 
 import dev.jpcode.eccore.util.TextUtil;
@@ -17,7 +17,7 @@ public final class CommandUtil {
 
     private CommandUtil() {}
 
-    public static RequiredArgumentBuilder<CommandSourceStack, String> targetPlayerArgument() {
+    public static RequiredArgumentBuilder<CommandSourceStack, EntitySelector> targetPlayerArgument() {
         return NicknameTargetResolver.targetPlayerArgumentNonGreedy();
     }
 

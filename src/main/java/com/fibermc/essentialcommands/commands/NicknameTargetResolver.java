@@ -2,20 +2,17 @@ package com.fibermc.essentialcommands.commands;
 
 import java.util.LinkedHashSet;
 import java.util.Locale;
-import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 
+import com.fibermc.essentialcommands.access.EntitySelectorNicknameAccess;
 import com.fibermc.essentialcommands.playerdata.PlayerData;
 import com.fibermc.essentialcommands.playerdata.PlayerDataManager;
-
-import com.mojang.brigadier.StringReader;
-import com.mojang.brigadier.arguments.StringArgumentType;
+import com.fibermc.essentialcommands.types.NicknameCommandArgMode;
 import com.mojang.brigadier.builder.RequiredArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
-
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.arguments.EntityArgument;
@@ -23,113 +20,136 @@ import net.minecraft.commands.arguments.selector.EntitySelector;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 
+import static com.fibermc.essentialcommands.EssentialCommands.CONFIG;
+
 /**
- * Resolves online players by real username first, then by a unique
- * Essential Commands nickname.
+ * Adds optional nickname fallback on top of Minecraft's normal player
+ * argument handling. Vanilla resolution is always attempted first.
  */
 public final class NicknameTargetResolver {
     private NicknameTargetResolver() {}
 
-    /**
-     * Greedy player argument for commands where the target is the final
-     * argument. This allows unquoted nicknames containing spaces.
-     */
-    public static RequiredArgumentBuilder<CommandSourceStack, String> targetPlayerArgument() {
-        return Commands.argument("target_player", StringArgumentType.greedyString())
-            .suggests((context, builder) -> suggestPlayers(context, builder, false));
+    public static RequiredArgumentBuilder<CommandSourceStack, EntitySelector> targetPlayerArgument() {
+        return Commands.argument("target_player", EntityArgument.player())
+            .suggests(NicknameTargetResolver::suggestPlayers);
     }
 
-    /**
-     * Non-greedy player argument for commands that have arguments after the
-     * target. Nicknames containing spaces can be quoted.
-     */
-    public static RequiredArgumentBuilder<CommandSourceStack, String> targetPlayerArgumentNonGreedy() {
-        return Commands.argument("target_player", StringArgumentType.string())
-            .suggests((context, builder) -> suggestPlayers(context, builder, true));
+    public static RequiredArgumentBuilder<CommandSourceStack, EntitySelector> targetPlayerArgumentNonGreedy() {
+        return targetPlayerArgument();
     }
 
     private static CompletableFuture<Suggestions> suggestPlayers(
         CommandContext<CommandSourceStack> context,
-        SuggestionsBuilder builder,
-        boolean quoteSuggestions
+        SuggestionsBuilder builder
     ) throws CommandSyntaxException {
-        if (builder.getRemaining().startsWith("@")) {
-            return EntityArgument.player().listSuggestions(context, builder);
-        }
+        if (
+            CONFIG.NICKNAMES_AS_COMMAND_ARG != NicknameCommandArgMode.Never
+            && PlayerDataManager.exists()
+        ) {
+            String remaining = builder.getRemaining().toLowerCase(Locale.ROOT);
+            var nicknameSuggestions = new LinkedHashSet<String>();
 
-        var names = new LinkedHashSet<String>();
-        for (ServerPlayer player : context.getSource().getServer().getPlayerList().getPlayers()) {
-            names.add(player.getGameProfile().name());
-            PlayerData.access(player)
-                .getNickname()
-                .map(Component::getString)
-                .filter(nickname -> !nickname.isBlank())
-                .ifPresent(names::add);
-        }
+            for (PlayerData playerData : PlayerDataManager.getInstance().getAllPlayerData()) {
+                playerData.getNickname()
+                    .map(Component::getString)
+                    .map(NicknameTargetResolver::normalizeNickname)
+                    .filter(nickname -> !nickname.isBlank())
+                    .ifPresent(nicknameSuggestions::add);
+            }
 
-        String remaining = builder.getRemaining();
-        String prefix = remaining.startsWith("\"") ? remaining.substring(1) : remaining;
-        prefix = prefix.toLowerCase(Locale.ROOT);
-
-        for (String name : names) {
-            if (name.toLowerCase(Locale.ROOT).startsWith(prefix)) {
-                builder.suggest(quoteSuggestions ? quoteIfNeeded(name) : name);
+            for (String nickname : nicknameSuggestions) {
+                if (nickname.toLowerCase(Locale.ROOT).startsWith(remaining)) {
+                    builder.suggest(nickname);
+                }
             }
         }
-        return builder.buildFuture();
+
+        return EntityArgument.player().listSuggestions(context, builder);
     }
 
-    private static String quoteIfNeeded(String value) {
-        if (value.indexOf(' ') < 0 && value.indexOf('"') < 0 && value.indexOf('\\') < 0) {
-            return value;
-        }
-        return "\"" + value.replace("\\", "\\\\").replace("\"", "\\\"") + "\"";
-    }
-
+    /**
+     * Resolves an Essential Commands player argument.
+     *
+     * Everywhere:
+     *   EntityArgument resolves nicknames through EntitySelectorNicknameMixin.
+     * EssentialCommandsOnly:
+     *   Vanilla is attempted first, then the shared literal nickname fallback.
+     * Never:
+     *   Vanilla behavior is used unchanged.
+     */
     public static ServerPlayer getPlayer(
         CommandContext<CommandSourceStack> context,
         String argumentName
     ) throws CommandSyntaxException {
-        String target = StringArgumentType.getString(context, argumentName).trim();
+        try {
+            return EntityArgument.getPlayer(context, argumentName);
+        } catch (CommandSyntaxException vanillaFailure) {
+            if (CONFIG.NICKNAMES_AS_COMMAND_ARG != NicknameCommandArgMode.EssentialCommandsOnly) {
+                throw vanillaFailure;
+            }
 
-        // Preserve normal vanilla selector behavior.
-        if (target.startsWith("@")) {
-            EntitySelector selector = EntityArgument.player().parse(
-                new StringReader(target),
-                context.getSource()
-            );
-            return selector.findSinglePlayer(context.getSource());
+            EntitySelector selector = context.getArgument(argumentName, EntitySelector.class);
+            String playerName = ((EntitySelectorNicknameAccess) (Object) selector).ec$getPlayerName();
+            ServerPlayer nicknameMatch = resolveLiteralPlayer(playerName);
+            if (nicknameMatch != null) {
+                return nicknameMatch;
+            }
+
+            throw vanillaFailure;
+        }
+    }
+
+    /**
+     * Finds one online player whose nickname matches the literal command
+     * player name after whitespace normalization.
+     *
+     * Returns null for no match or an ambiguous normalized nickname.
+     */
+    public static ServerPlayer resolveLiteralPlayer(String playerName) {
+        if (
+            playerName == null
+            || playerName.isBlank()
+            || !PlayerDataManager.exists()
+        ) {
+            return null;
         }
 
-        // Real Minecraft usernames always win over nickname collisions.
-        ServerPlayer usernameMatch = context
-            .getSource()
-            .getServer()
-            .getPlayerList()
-            .getPlayerByName(target);
-        if (usernameMatch != null) {
-            return usernameMatch;
+        String target = normalizeNickname(playerName);
+        if (target.isBlank()) {
+            return null;
         }
 
-        var nicknameMatches = PlayerDataManager
-            .getInstance()
-            .getPlayerDataMatchingNickname(target)
-            .stream()
-            .map(PlayerData::getPlayer)
-            .filter(Objects::nonNull)
-            .toList();
+        ServerPlayer nicknameMatch = null;
+        for (PlayerData playerData : PlayerDataManager.getInstance().getAllPlayerData()) {
+            boolean matches = playerData
+                .getNickname()
+                .map(Component::getString)
+                .map(NicknameTargetResolver::normalizeNickname)
+                .map(nickname -> nickname.equalsIgnoreCase(target))
+                .orElse(false);
 
-        if (nicknameMatches.size() == 1) {
-            return nicknameMatches.get(0);
-        }
-        if (nicknameMatches.size() > 1) {
-            throw CommandUtil.createSimpleException(Component.literal(
-                "Nickname \"" + target + "\" matches more than one online player. Use the real username instead."
-            ));
+            if (!matches) {
+                continue;
+            }
+
+            ServerPlayer player = playerData.getPlayer();
+            if (player == null) {
+                continue;
+            }
+
+            if (nicknameMatch != null && nicknameMatch != player) {
+                // Normalization can make different nicknames collide, e.g.
+                // "Foo Bar" and "FooBar". Never choose one arbitrarily.
+                return null;
+            }
+
+            nicknameMatch = player;
         }
 
-        throw CommandUtil.createSimpleException(Component.literal(
-            "No online player found with username or nickname \"" + target + "\"."
-        ));
+        return nicknameMatch;
+    }
+
+    private static String normalizeNickname(String nickname) {
+        return nickname.replaceAll("\\s+", "");
     }
 }
