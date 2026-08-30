@@ -334,7 +334,7 @@ public class PlayerData extends SavedData implements IServerPlayerEntityData, IF
             }
         }
 
-        PlayerDataManager.getInstance().markNicknameDirty(this, this.normalizedNickname);
+        PlayerDataManager.getInstance().markDisplayNameDirty(this);
     }
 
     public boolean isAfk() {

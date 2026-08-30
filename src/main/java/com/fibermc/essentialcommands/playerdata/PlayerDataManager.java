@@ -103,8 +103,12 @@ public class PlayerDataManager {
         return instance != null ? instance : new PlayerDataManager();
     }
 
-    public void markNicknameDirty(PlayerData playerData, @Nullable String oldNormalizedNickname) {
+    public void markDisplayNameDirty(PlayerData playerData) {
         changedNicknames.add(playerData);
+    }
+
+    public void markNicknameDirty(PlayerData playerData, @Nullable String oldNormalizedNickname) {
+        markDisplayNameDirty(playerData);
         removeFromNicknameMap(playerData, oldNormalizedNickname);
         addToNicknameMap(playerData);
     }
