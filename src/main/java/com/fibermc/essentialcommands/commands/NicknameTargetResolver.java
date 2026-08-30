@@ -41,27 +41,31 @@ public final class NicknameTargetResolver {
         CommandContext<CommandSourceStack> context,
         SuggestionsBuilder builder
     ) throws CommandSyntaxException {
-        if (
-            CONFIG.NICKNAMES_AS_COMMAND_ARG != NicknameCommandArgMode.Never
-            && PlayerDataManager.exists()
-        ) {
-            String remaining = PlayerData.normalizeNickname(builder.getRemaining());
-
-            for (PlayerData playerData : PlayerDataManager.getInstance().getAllPlayerData()) {
-                String normalized = playerData.getNormalizedNickname();
-                if (normalized == null || !normalized.startsWith(remaining)) {
-                    continue;
-                }
-                // Suggest whitespace-stripped but case-preserved form
-                playerData.getNickname()
-                    .map(Component::getString)
-                    .map(nick -> nick.replaceAll("\\s+", ""))
-                    .filter(nick -> !nick.isBlank())
-                    .ifPresent(builder::suggest);
-            }
+        if (CONFIG.NICKNAMES_AS_COMMAND_ARG != NicknameCommandArgMode.Never) {
+            addNicknameSuggestions(builder);
         }
 
         return EntityArgument.player().listSuggestions(context, builder);
+    }
+
+    public static void addNicknameSuggestions(SuggestionsBuilder builder) {
+        if (!PlayerDataManager.exists()) {
+            return;
+        }
+
+        String remaining = PlayerData.normalizeNickname(builder.getRemaining());
+
+        for (PlayerData playerData : PlayerDataManager.getInstance().getAllPlayerData()) {
+            String normalized = playerData.getNormalizedNickname();
+            if (normalized == null || !normalized.startsWith(remaining)) {
+                continue;
+            }
+            playerData.getNickname()
+                .map(Component::getString)
+                .map(nick -> nick.replaceAll("\\s+", ""))
+                .filter(nick -> !nick.isBlank())
+                .ifPresent(builder::suggest);
+        }
     }
 
     /**
