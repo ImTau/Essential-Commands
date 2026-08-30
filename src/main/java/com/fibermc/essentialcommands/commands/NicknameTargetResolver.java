@@ -68,16 +68,6 @@ public final class NicknameTargetResolver {
         }
     }
 
-    /**
-     * Resolves an Essential Commands player argument.
-     *
-     * Everywhere:
-     *   EntityArgument resolves nicknames through EntitySelectorNicknameMixin.
-     * EssentialCommandsOnly:
-     *   Vanilla is attempted first, then the shared literal nickname fallback.
-     * Never:
-     *   Vanilla behavior is used unchanged.
-     */
     public static ServerPlayer getPlayer(
         CommandContext<CommandSourceStack> context,
         String argumentName
