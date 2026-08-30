@@ -1,7 +1,6 @@
 package com.fibermc.essentialcommands.commands;
 
-import java.util.LinkedHashSet;
-import java.util.Locale;
+import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
 import com.fibermc.essentialcommands.access.EntitySelectorNicknameAccess;
@@ -46,21 +45,19 @@ public final class NicknameTargetResolver {
             CONFIG.NICKNAMES_AS_COMMAND_ARG != NicknameCommandArgMode.Never
             && PlayerDataManager.exists()
         ) {
-            String remaining = builder.getRemaining().toLowerCase(Locale.ROOT);
-            var nicknameSuggestions = new LinkedHashSet<String>();
+            String remaining = PlayerData.normalizeNickname(builder.getRemaining());
 
             for (PlayerData playerData : PlayerDataManager.getInstance().getAllPlayerData()) {
+                String normalized = playerData.getNormalizedNickname();
+                if (normalized == null || !normalized.startsWith(remaining)) {
+                    continue;
+                }
+                // Suggest whitespace-stripped but case-preserved form
                 playerData.getNickname()
                     .map(Component::getString)
-                    .map(NicknameTargetResolver::normalizeNickname)
-                    .filter(nickname -> !nickname.isBlank())
-                    .ifPresent(nicknameSuggestions::add);
-            }
-
-            for (String nickname : nicknameSuggestions) {
-                if (nickname.toLowerCase(Locale.ROOT).startsWith(remaining)) {
-                    builder.suggest(nickname);
-                }
+                    .map(nick -> nick.replaceAll("\\s+", ""))
+                    .filter(nick -> !nick.isBlank())
+                    .ifPresent(builder::suggest);
             }
         }
 
@@ -89,8 +86,8 @@ public final class NicknameTargetResolver {
             }
 
             EntitySelector selector = context.getArgument(argumentName, EntitySelector.class);
-            String playerName = ((EntitySelectorNicknameAccess) (Object) selector).ec$getPlayerName();
-            ServerPlayer nicknameMatch = resolveLiteralPlayer(playerName);
+            String playerName = ((EntitySelectorNicknameAccess) selector).ec$getPlayerName();
+            ServerPlayer nicknameMatch = resolvePlayerByNickname(playerName);
             if (nicknameMatch != null) {
                 return nicknameMatch;
             }
@@ -101,55 +98,23 @@ public final class NicknameTargetResolver {
 
     /**
      * Finds one online player whose nickname matches the literal command
-     * player name after whitespace normalization.
+     * player name after normalization (whitespace removal + case folding).
      *
-     * Returns null for no match or an ambiguous normalized nickname.
+     * Returns null for no match or an ambiguous match.
      */
-    public static ServerPlayer resolveLiteralPlayer(String playerName) {
+    public static ServerPlayer resolvePlayerByNickname(String playerName) {
         if (
             playerName == null
             || playerName.isBlank()
-            || !PlayerDataManager.exists()
         ) {
             return null;
         }
 
-        String target = normalizeNickname(playerName);
-        if (target.isBlank()) {
+        List<PlayerData> matches = PlayerDataManager.getInstance().getByNickname(playerName);
+        // Ambiguous (>1) or no match -- never choose one arbitrarily.
+        if (matches.size() != 1) {
             return null;
         }
-
-        ServerPlayer nicknameMatch = null;
-        for (PlayerData playerData : PlayerDataManager.getInstance().getAllPlayerData()) {
-            boolean matches = playerData
-                .getNickname()
-                .map(Component::getString)
-                .map(NicknameTargetResolver::normalizeNickname)
-                .map(nickname -> nickname.equalsIgnoreCase(target))
-                .orElse(false);
-
-            if (!matches) {
-                continue;
-            }
-
-            ServerPlayer player = playerData.getPlayer();
-            if (player == null) {
-                continue;
-            }
-
-            if (nicknameMatch != null && nicknameMatch != player) {
-                // Normalization can make different nicknames collide, e.g.
-                // "Foo Bar" and "FooBar". Never choose one arbitrarily.
-                return null;
-            }
-
-            nicknameMatch = player;
-        }
-
-        return nicknameMatch;
-    }
-
-    private static String normalizeNickname(String nickname) {
-        return nickname.replaceAll("\\s+", "");
+        return matches.getFirst().getPlayer();
     }
 }

@@ -45,7 +45,7 @@ public abstract class EntitySelectorNicknameMixin implements EntitySelectorNickn
             return;
         }
 
-        ServerPlayer player = NicknameTargetResolver.resolveLiteralPlayer(this.playerName);
+        ServerPlayer player = NicknameTargetResolver.resolvePlayerByNickname(this.playerName);
         if (player != null) {
             cir.setReturnValue(List.of(player));
         }
@@ -63,7 +63,7 @@ public abstract class EntitySelectorNicknameMixin implements EntitySelectorNickn
             return;
         }
 
-        ServerPlayer player = NicknameTargetResolver.resolveLiteralPlayer(this.playerName);
+        ServerPlayer player = NicknameTargetResolver.resolvePlayerByNickname(this.playerName);
         if (player != null) {
             cir.setReturnValue(List.of(player));
         }
